@@ -1,13 +1,9 @@
 package btc.exchange.client.requesthandlers;
 
-import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
-
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.utils.URIBuilder;
 
 import btc.exchange.client.BtcExchangeConfig;
 import btc.exchange.client.framework.ExchangeApiScheduledService;
@@ -21,23 +17,9 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
 @Exchange(BtcExchangeConfig.CAMPBX)
-public final class CampBXExchangeClient {	
+public final class CampBXRequestHandlers {	
 	
-	public static final class CampBXDepthScheduledServiceRequest extends ExchangeApiScheduledService {	
-		private HttpGet depthHttpGet;	
-
-		@Override
-		public HttpGet getHttpRequest() {
-			if (depthHttpGet ==null) {
-				try {
-					depthHttpGet = new HttpGet( new URIBuilder(EXCHANGE_CONFIG.getBaseURI())
-					.setPath(EXCHANGE_CONFIG.getBaseURI().getPath() + "xdepth.php").build() );
-				} catch (URISyntaxException e) {
-					e.printStackTrace();
-				}
-			}
-			return depthHttpGet;
-		}
+	public static final class CampBXDepthScheduledServiceRequest extends ExchangeApiScheduledService {
 
 		@Override
 		public void handleResponse(final String jsonResponse) {
@@ -47,6 +29,16 @@ public final class CampBXExchangeClient {
 			final Depth depth = new Depth(bids, asks);
 
 			EXCHANGE_CONFIG.updateDepth(depth);
+		}
+
+		@Override
+		protected Scheduler scheduler() {
+			return Scheduler.newFixedRateSchedule(0, 30000, TimeUnit.MILLISECONDS); // TODO pull from config
+		}
+
+		@Override
+		protected String getApiMethodPath() {
+			return "xdepth.php"; // TODO pull from config
 		}
 		
 		private List<PriceQuantity> jsonArrayToList(final JsonArray jsonArray) {
@@ -60,29 +52,9 @@ public final class CampBXExchangeClient {
 	        }	        
 	        return pqList;
 	    }	
-
-		@Override
-		protected Scheduler scheduler() {
-			return Scheduler.newFixedRateSchedule(0, 30000, TimeUnit.MILLISECONDS);
-		}
-		
 	}
 	
-	public static final class CampBXTickerScheduledServiceRequest extends ExchangeApiScheduledService {	
-		private static HttpGet tickerHttpGet;	
-		
-		@Override
-		public HttpGet getHttpRequest() {
-			if (tickerHttpGet ==null) {
-				try {
-					tickerHttpGet = new HttpGet( new URIBuilder(EXCHANGE_CONFIG.getBaseURI())
-					.setPath(EXCHANGE_CONFIG.getBaseURI().getPath() + "xticker.php").build() );
-				} catch (URISyntaxException e) {
-					e.printStackTrace();
-				}
-			}
-			return tickerHttpGet;
-		}
+	public static final class CampBXTickerScheduledServiceRequest extends ExchangeApiScheduledService {
 
 		@Override
 		public void handleResponse(final String jsonResponse) {
@@ -95,7 +67,12 @@ public final class CampBXExchangeClient {
 
 		@Override
 		protected Scheduler scheduler() {
-			return Scheduler.newFixedRateSchedule(0, 500, TimeUnit.MILLISECONDS);
+			return Scheduler.newFixedRateSchedule(0, 1000, TimeUnit.MILLISECONDS); // TODO pull from config
+		}
+
+		@Override
+		protected String getApiMethodPath() {
+			return "xticker.php"; // TODO pull from config
 		}		
 	}
 	

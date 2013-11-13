@@ -9,11 +9,15 @@ import btc.exchange.client.response.Depth;
 import btc.exchange.client.response.Ticker;
 
 public enum BtcExchangeConfig {
-	CAMPBX("campbx.com", "/api/", .006);
+	CAMPBX("campbx.com", "/api/", .006),
+	MTGOX("data.mtgox.com", "/api/2/", .01);
 	
+	// Configuration
 	private URI baseApiURI;	
 	private double trxFee;
-	final Depth depth = new Depth();
+	
+	// Active Exchange Data
+	private final Depth depth = new Depth();
 	private final Ticker ticker = new Ticker();
 	
 	BtcExchangeConfig(final String apiHost, final String apiPath, double trxFee) {
@@ -27,24 +31,18 @@ public enum BtcExchangeConfig {
 		this.trxFee = trxFee;
 	}
 
-	public double getTrxFee() {
-		return trxFee;
-	}
-
-
 	public URI getBaseURI() {
 		return baseApiURI;
 	}
 	
 	public void updateDepth(Depth depth) {
 		this.depth.updateDepth(depth);
-		System.out.println("Updated client depth.\n" + this + "\n" + this.depth);
+		System.out.println("Updated " + this + this.depth);
 	}
 	
 	public void updateTicker(Ticker ticker) {
 		this.ticker.updateTicker(ticker);
-		System.out.println("Updated client ticker.\n" + this);
-        System.out.println(ticker);
+		System.out.println("Updated " + this + this.ticker);
 	}
 	
 }
