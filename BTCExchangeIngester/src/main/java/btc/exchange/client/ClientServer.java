@@ -12,8 +12,8 @@ import java.util.concurrent.TimeoutException;
 
 import org.reflections.Reflections;
 
-import btc.exchange.client.framework.ExchangeApiScheduledService;
 import btc.exchange.client.requesthandlers.Exchange;
+import btc.exchange.client.requesthandlers.ExchangeApiRequestHandler;
 
 import com.google.common.util.concurrent.MoreExecutors;
 import com.google.common.util.concurrent.Service;
@@ -56,15 +56,12 @@ public class ClientServer {
 			}
 		});
 		manager.startAsync();
-
-		manager.awaitHealthy();
-		System.out.println("started healthy.");
 		
 		for (;;) {
 			for (Entry<State, Service> entries : manager.servicesByState().entries()) {
 				System.out.println(entries);
 			}
-			Thread.sleep(1000);
+			Thread.sleep(3000);
 		}
 	}
 	
@@ -76,10 +73,10 @@ public class ClientServer {
 		for ( final Class<?> exchangeRequestHandlersClass : reflections.getTypesAnnotatedWith(Exchange.class)) {
 			final BtcExchangeConfig exchangeConfig = exchangeRequestHandlersClass.getAnnotation(Exchange.class).value();			
 			for ( final Class<?> innerExchangeClass : exchangeRequestHandlersClass.getDeclaredClasses()) {
-				if (innerExchangeClass.getSuperclass().equals(ExchangeApiScheduledService.class)) {
+				if (innerExchangeClass.getSuperclass().equals(ExchangeApiRequestHandler.class)) {
 					try {
-						final ExchangeApiScheduledService scheduledService = (ExchangeApiScheduledService) Class.forName(innerExchangeClass.getName()).newInstance();
-						for ( final Field field : getAllFields(ExchangeApiScheduledService.class, withType(BtcExchangeConfig.class)) ) {							
+						final ExchangeApiRequestHandler scheduledService = (ExchangeApiRequestHandler) Class.forName(innerExchangeClass.getName()).newInstance();
+						for ( final Field field : getAllFields(ExchangeApiRequestHandler.class, withType(BtcExchangeConfig.class)) ) {							
 							field.setAccessible(true);
 							field.set(scheduledService, exchangeConfig);
 						}

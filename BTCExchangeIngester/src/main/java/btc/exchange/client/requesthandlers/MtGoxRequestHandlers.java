@@ -3,12 +3,11 @@ package btc.exchange.client.requesthandlers;
 import java.util.concurrent.TimeUnit;
 
 import btc.exchange.client.BtcExchangeConfig;
-import btc.exchange.client.framework.ExchangeApiScheduledService;
 
 @Exchange(BtcExchangeConfig.MTGOX)
 public class MtGoxRequestHandlers {
 	
-	public static final class MtGoxTickerscheduledServiceRequest extends ExchangeApiScheduledService {
+	public static final class MtGoxTickerscheduledServiceRequest extends ExchangeApiRequestHandler {
 
 		@Override
 		protected void handleResponse(String jsonResponse) {

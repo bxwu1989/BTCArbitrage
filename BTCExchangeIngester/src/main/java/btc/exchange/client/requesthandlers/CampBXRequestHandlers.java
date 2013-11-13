@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import btc.exchange.client.BtcExchangeConfig;
-import btc.exchange.client.framework.ExchangeApiScheduledService;
 import btc.exchange.client.response.Depth;
 import btc.exchange.client.response.Depth.PriceQuantity;
 import btc.exchange.client.response.Ticker;
@@ -19,7 +18,7 @@ import com.google.gson.JsonParser;
 @Exchange(BtcExchangeConfig.CAMPBX)
 public final class CampBXRequestHandlers {	
 	
-	public static final class CampBXDepthScheduledServiceRequest extends ExchangeApiScheduledService {
+	public static final class CampBXDepthScheduledServiceRequest extends ExchangeApiRequestHandler {
 
 		@Override
 		public void handleResponse(final String jsonResponse) {
@@ -54,7 +53,7 @@ public final class CampBXRequestHandlers {
 	    }	
 	}
 	
-	public static final class CampBXTickerScheduledServiceRequest extends ExchangeApiScheduledService {
+	public static final class CampBXTickerScheduledServiceRequest extends ExchangeApiRequestHandler {
 
 		@Override
 		public void handleResponse(final String jsonResponse) {

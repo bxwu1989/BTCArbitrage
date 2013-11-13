@@ -1,4 +1,4 @@
-package btc.exchange.client.framework;
+package btc.exchange.client.requesthandlers;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -19,7 +19,7 @@ import btc.exchange.client.BtcExchangeConfig;
 
 import com.google.common.util.concurrent.AbstractScheduledService;
 
-public abstract class ExchangeApiScheduledService extends AbstractScheduledService {
+public abstract class ExchangeApiRequestHandler extends AbstractScheduledService {
 
 	protected BtcExchangeConfig EXCHANGE_CONFIG;
 	private static final PoolingHttpClientConnectionManager CM = new PoolingHttpClientConnectionManager();
