@@ -6,7 +6,7 @@ import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.ResponseHandler;
-import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
@@ -18,26 +18,27 @@ import com.google.common.util.concurrent.AbstractScheduledService;
 
 public abstract class ExchangeApiScheduledService extends AbstractScheduledService {
 
-	private static final PoolingHttpClientConnectionManager cm = new PoolingHttpClientConnectionManager();
+	protected BtcExchangeConfig EXCHANGE_CONFIG;
+	private static final PoolingHttpClientConnectionManager CM = new PoolingHttpClientConnectionManager();
     static {
-    	cm.setMaxTotal(BtcExchangeConfig.values().length);
+    	CM.setMaxTotal(BtcExchangeConfig.values().length);
     }
-	private final CloseableHttpClient httpClient = HttpClients.custom().setConnectionManager(cm).build();
+	private final CloseableHttpClient httpClient = HttpClients.custom().setConnectionManager(CM).build();
 	
-	public ExchangeApiScheduledService() {
-	}
-	
-	protected abstract HttpGet getHttpGet();
+	// Would like to change this to just return a string of the API path so
+			// that we can move the HttpRequest construction logic into this
+			// framework. However in the future we will need to suppport Post and
+			// Https requests as well.
+	protected abstract HttpRequestBase getHttpRequest();
 	protected abstract void handleResponse(String rawResponse);
 	
 	@Override
 	protected final void runOneIteration() throws Exception {
 		try {
-			handleResponse(httpClient.execute(getHttpGet(), DEFAULT_REQUEST_HANDLER));
+			handleResponse(httpClient.execute(getHttpRequest(), DEFAULT_REQUEST_HANDLER));
 		} catch (IOException e1) {
 			e1.printStackTrace();
-		} 
-		
+		} 		
 	}
 	
 	private static final ResponseHandler<String> DEFAULT_REQUEST_HANDLER = new ResponseHandler<String>() {
