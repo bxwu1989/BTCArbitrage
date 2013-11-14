@@ -12,6 +12,7 @@ import java.util.concurrent.TimeoutException;
 
 import org.reflections.Reflections;
 
+import btc.exchange.client.publishers.AwsSnsArbitragePotentialPublisher;
 import btc.exchange.client.requesthandlers.Exchange;
 import btc.exchange.client.requesthandlers.ExchangeApiRequestHandler;
 
@@ -24,8 +25,9 @@ import com.google.common.util.concurrent.ServiceManager.Listener;
 public class ClientServer {	
 
 	public static void main(String[] args) throws InterruptedException {
-		
-		final ServiceManager manager = new ServiceManager(initializeAllExchangeScheduledServices());
+		final List<Service> services = initializeAllExchangeScheduledServices();
+		services.add(new AwsSnsArbitragePotentialPublisher());
+		final ServiceManager manager = new ServiceManager(services);
 		manager.addListener(new Listener() {
 			public void stopped() {
 			}
@@ -71,12 +73,12 @@ public class ClientServer {
 		final List<Service> allExchangesMarketRequests = new ArrayList<>();
 		final Reflections reflections = new Reflections("btc.exchange.client");    		
 		for ( final Class<?> exchangeRequestHandlersClass : reflections.getTypesAnnotatedWith(Exchange.class)) {
-			final BtcExchangeConfig exchangeConfig = exchangeRequestHandlersClass.getAnnotation(Exchange.class).value();			
+			final ExchangeConfig exchangeConfig = exchangeRequestHandlersClass.getAnnotation(Exchange.class).value();			
 			for ( final Class<?> innerExchangeClass : exchangeRequestHandlersClass.getDeclaredClasses()) {
 				if (innerExchangeClass.getSuperclass().equals(ExchangeApiRequestHandler.class)) {
 					try {
 						final ExchangeApiRequestHandler scheduledService = (ExchangeApiRequestHandler) Class.forName(innerExchangeClass.getName()).newInstance();
-						for ( final Field field : getAllFields(ExchangeApiRequestHandler.class, withType(BtcExchangeConfig.class)) ) {							
+						for ( final Field field : getAllFields(ExchangeApiRequestHandler.class, withType(ExchangeConfig.class)) ) {							
 							field.setAccessible(true);
 							field.set(scheduledService, exchangeConfig);
 						}

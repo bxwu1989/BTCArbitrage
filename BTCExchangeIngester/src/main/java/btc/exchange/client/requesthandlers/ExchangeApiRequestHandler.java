@@ -15,16 +15,16 @@ import org.apache.http.impl.client.HttpClients;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.apache.http.util.EntityUtils;
 
-import btc.exchange.client.BtcExchangeConfig;
+import btc.exchange.client.ExchangeConfig;
 
 import com.google.common.util.concurrent.AbstractScheduledService;
 
 public abstract class ExchangeApiRequestHandler extends AbstractScheduledService {
 
-	protected BtcExchangeConfig EXCHANGE_CONFIG;
+	protected ExchangeConfig EXCHANGE_CONFIG;
 	private static final PoolingHttpClientConnectionManager CM = new PoolingHttpClientConnectionManager();
     static {
-    	CM.setMaxTotal(BtcExchangeConfig.values().length);
+    	CM.setMaxTotal(ExchangeConfig.values().length);
     }
 	private final CloseableHttpClient httpClient = HttpClients.custom().setConnectionManager(CM).build();
 	

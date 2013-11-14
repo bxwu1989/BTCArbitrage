@@ -8,7 +8,7 @@ import org.apache.http.client.utils.URIBuilder;
 import btc.exchange.client.response.Depth;
 import btc.exchange.client.response.Ticker;
 
-public enum BtcExchangeConfig {
+public enum ExchangeConfig {
 	CAMPBX("campbx.com", "/api/", .006),
 	MTGOX("data.mtgox.com", "/api/2/", .01);
 	
@@ -20,7 +20,7 @@ public enum BtcExchangeConfig {
 	private final Depth depth = new Depth();
 	private final Ticker ticker = new Ticker();
 	
-	BtcExchangeConfig(final String apiHost, final String apiPath, double trxFee) {
+	ExchangeConfig(final String apiHost, final String apiPath, double trxFee) {
 		try {
 			this.baseApiURI = new URIBuilder()
 				.setScheme("http").setHost(apiHost).setPath(apiPath).build();
@@ -43,6 +43,10 @@ public enum BtcExchangeConfig {
 	public void updateTicker(Ticker ticker) {
 		this.ticker.updateTicker(ticker);
 		System.out.println("Updated " + this + this.ticker);
+	}
+	
+	public Depth getDepth() {
+		return depth;
 	}
 	
 }
