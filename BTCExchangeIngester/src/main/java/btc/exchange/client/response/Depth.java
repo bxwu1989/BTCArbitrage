@@ -9,7 +9,7 @@ import java.util.List;
 public class Depth {
     private List<PriceQuantity> bids;
     private List<PriceQuantity> asks;
-
+    
     public Depth() {
     	this.bids = new ArrayList<PriceQuantity>();
     	this.asks = new ArrayList<PriceQuantity>();

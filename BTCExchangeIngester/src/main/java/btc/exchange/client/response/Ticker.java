@@ -1,14 +1,14 @@
 package btc.exchange.client.response;
 
+import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 
-/**
- * The response back from /xticker.
- */
 public class Ticker {
     private double lastTrade;
     private double bestAsk;
     private double bestBid;
 
+    private final DescriptiveStatistics runningTradeHistory = new DescriptiveStatistics(60);
+    
     public Ticker() { 	
     }
 
@@ -19,9 +19,10 @@ public class Ticker {
     }
 
 	public void updateTicker(Ticker ticker) {
-		this.lastTrade = ticker.lastTrade;
-        this.bestAsk = ticker.bestAsk;
-        this.bestBid = ticker.bestBid;
+		lastTrade = ticker.lastTrade;
+		runningTradeHistory.addValue(lastTrade);
+        bestAsk = ticker.bestAsk;
+        bestBid = ticker.bestBid;
 	}
 	
     public double getLastTrade() {
@@ -34,6 +35,10 @@ public class Ticker {
         return this.bestBid;
     }
 
+    public double getRunningTradeMean() {
+    	return runningTradeHistory.getMean();
+    }
+    
     @Override
 	public String toString() {
 		StringBuilder builder = new StringBuilder();
