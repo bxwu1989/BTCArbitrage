@@ -1,6 +1,5 @@
 import java.io.File;
 import java.io.IOException;
-import java.util.Date;
 import java.util.List;
 
 import prediction.models.IntervalManagedVolatilityBand;
@@ -16,22 +15,16 @@ public class VolatilityBandTester {
 	
 	// You can download entire exchange transaction histories from http://api.bitcoincharts.com/v1/csv/
 	private static final String BTC_TRX_FILE = "ExchangeTradeHistory/mtgoxUSD.csv"; // ex. 1305349163,8.410010000000,11.618000000000
-    
+
     public static void main(String[] args) throws IOException {
     	final double desiredDiscreteIntervalInMillis = 1000 * 60 * 60;
+    	
     	final IntervalManagedVolatilityBand vBand = readExchangeTransactions(desiredDiscreteIntervalInMillis);
-
-    	 
-        System.out.println(vBand.getMeanVolatilityBandWidth() + " : average window size"); 
-        System.out.println(new Date(vBand.getEpoch()) + " - " + new Date(vBand.getLatestTimetamp()));
+ 	
+    	System.out.println(vBand);
+    	
         final int numExpectedIntervals = (int)( (vBand.getLatestTimetamp() - vBand.getEpoch())  / desiredDiscreteIntervalInMillis );
         System.out.println("Expected " +  numExpectedIntervals + " intervals : got " + vBand.getIntervalsSinceEpoch());
-        System.out.println("Window distribution coverage % " + vBand.getPredictionIntervalHitRatePerValAdded());
-        
-        // final SummaryStatistics percentagePriceDiffsFromMean = new SummaryStatistics();
-        // final double percentagePriceDiffFromMean = deviation / geometricMean * 100;
-        // percentagePriceDiffsFromMean.addValue(percentagePriceDiffFromMean);
-    	// System.out.println(percentagePriceDiffsFromMean.getMean() + " : average percent diff size");
     }
     	
 	static IntervalManagedVolatilityBand readExchangeTransactions(final double intervalInMillis) throws IOException {
