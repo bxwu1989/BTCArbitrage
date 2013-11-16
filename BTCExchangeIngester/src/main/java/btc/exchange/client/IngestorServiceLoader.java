@@ -4,6 +4,7 @@ import static org.reflections.ReflectionUtils.getAllFields;
 import static org.reflections.ReflectionUtils.withType;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -13,6 +14,7 @@ import btc.exchange.client.publishers.AwsSnsArbitragePotentialPublisher;
 import btc.exchange.client.requesthandlers.Exchange;
 import btc.exchange.client.requesthandlers.ExchangeApiRequestHandler;
 
+import com.google.common.util.concurrent.AbstractScheduledService;
 import com.google.common.util.concurrent.Service;
 
 import framework.ServiceLoader;
@@ -59,6 +61,16 @@ public class IngestorServiceLoader implements ServiceLoader {
 	}
 	
 	private void initializeAllPublishers() {
-		ALL_SERVICES.add(new AwsSnsArbitragePotentialPublisher());
+		final Reflections reflections = new Reflections("btc.exchange.client.publishers");   
+		for ( final Class<? extends AbstractScheduledService> scheduledServicePublishers : reflections.getSubTypesOf(AbstractScheduledService.class)) {
+			if (!Modifier.isAbstract( scheduledServicePublishers.getModifiers() )) {
+				try {
+					ALL_SERVICES.add(scheduledServicePublishers.newInstance());
+				} catch (InstantiationException | IllegalAccessException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+		}
 	}
 }
