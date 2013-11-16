@@ -20,7 +20,7 @@ public enum ExchangeConfig {
 	private final Depth depth = new Depth();
 	private final Ticker ticker = new Ticker();
 	
-	ExchangeConfig(final String apiHost, final String apiPath, double trxFee) {
+	private ExchangeConfig(final String apiHost, final String apiPath, double trxFee) {
 		try {
 			this.baseApiURI = new URIBuilder()
 				.setScheme("http").setHost(apiHost).setPath(apiPath).build();
