@@ -12,7 +12,9 @@ public class AwsSnsArbitragePotentialPublisher extends AwsSnsPublisher {
 		return exConfig.getDepth().toString();
 	}
 
-	private static final Pattern ARBITRAGE_TOPIC_PATTERN = Pattern.compile(".*:(\\w*)_Arbitrage_Data$");
+	private static final Pattern ARBITRAGE_TOPIC_PATTERN = Pattern.compile(
+			".*:(\\w*)_Arbitrage_Data$", Pattern.CASE_INSENSITIVE);
+
 	@Override
 	public Pattern getTopicArnPattern() {
 		return ARBITRAGE_TOPIC_PATTERN;
