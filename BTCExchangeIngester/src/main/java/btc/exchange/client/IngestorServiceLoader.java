@@ -10,7 +10,6 @@ import java.util.List;
 
 import org.reflections.Reflections;
 
-import btc.exchange.client.publishers.AwsSnsArbitragePotentialPublisher;
 import btc.exchange.client.requesthandlers.Exchange;
 import btc.exchange.client.requesthandlers.ExchangeApiRequestHandler;
 
