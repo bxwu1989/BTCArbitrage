@@ -3,12 +3,12 @@ package framework;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
-import btc.exchange.client.IngestorServiceLoader;
-
 import com.google.common.util.concurrent.MoreExecutors;
 import com.google.common.util.concurrent.Service;
 import com.google.common.util.concurrent.ServiceManager;
 import com.google.common.util.concurrent.ServiceManager.Listener;
+
+import exchange.client.IngestorServiceLoader;
 
 public class ManagedServiceManager {	
 

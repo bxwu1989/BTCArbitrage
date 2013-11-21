@@ -1,4 +1,4 @@
-package btc.exchange.client.response;
+package exchange.client.response;
 
 import java.util.ArrayList;
 import java.util.List;

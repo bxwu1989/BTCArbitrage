@@ -1,8 +1,8 @@
-package btc.exchange.client.requesthandlers;
+package exchange.client.requesthandlers;
 
 import java.util.concurrent.TimeUnit;
 
-import btc.exchange.client.ExchangeConfig;
+import exchange.client.ExchangeConfig;
 
 @Exchange(ExchangeConfig.MTGOX)
 public class MtGoxRequestHandlers {

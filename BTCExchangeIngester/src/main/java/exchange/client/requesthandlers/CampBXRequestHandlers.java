@@ -1,19 +1,19 @@
-package btc.exchange.client.requesthandlers;
+package exchange.client.requesthandlers;
 
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
-import btc.exchange.client.ExchangeConfig;
-import btc.exchange.client.response.Depth;
-import btc.exchange.client.response.Depth.PriceQuantity;
-import btc.exchange.client.response.Ticker;
-
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+
+import exchange.client.ExchangeConfig;
+import exchange.client.response.Depth;
+import exchange.client.response.Depth.PriceQuantity;
+import exchange.client.response.Ticker;
 
 @Exchange(ExchangeConfig.CAMPBX)
 public final class CampBXRequestHandlers {	

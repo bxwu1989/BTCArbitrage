@@ -1,4 +1,4 @@
-package btc.exchange.client.response;
+package exchange.client.response;
 
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 

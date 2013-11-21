@@ -1,9 +1,9 @@
-package btc.exchange.client.publishers;
+package exchange.client.publishers;
 
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 
-import btc.exchange.client.ExchangeConfig;
+import exchange.client.ExchangeConfig;
 
 public class AwsSnsArbitragePotentialPublisher extends AwsSnsPublisher {
 

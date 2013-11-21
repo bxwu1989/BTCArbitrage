@@ -1,12 +1,12 @@
-package btc.exchange.client;
+package exchange.client;
 
 import java.net.URI;
 import java.net.URISyntaxException;
 
 import org.apache.http.client.utils.URIBuilder;
 
-import btc.exchange.client.response.Depth;
-import btc.exchange.client.response.Ticker;
+import exchange.client.response.Depth;
+import exchange.client.response.Ticker;
 
 public enum ExchangeConfig {
 	CAMPBX("campbx.com", "/api/", .006),

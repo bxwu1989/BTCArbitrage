@@ -1,4 +1,4 @@
-package btc.exchange.client;
+package exchange.client;
 
 import util.Configuration;
 

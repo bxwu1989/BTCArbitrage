@@ -1,4 +1,4 @@
-package btc.exchange.client.requesthandlers;
+package exchange.client.requesthandlers;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -15,9 +15,9 @@ import org.apache.http.impl.client.HttpClients;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.apache.http.util.EntityUtils;
 
-import btc.exchange.client.ExchangeConfig;
-
 import com.google.common.util.concurrent.AbstractScheduledService;
+
+import exchange.client.ExchangeConfig;
 
 public abstract class ExchangeApiRequestHandler extends AbstractScheduledService {
 

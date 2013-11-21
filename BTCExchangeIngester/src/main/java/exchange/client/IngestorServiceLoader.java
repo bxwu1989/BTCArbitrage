@@ -1,4 +1,4 @@
-package btc.exchange.client;
+package exchange.client;
 
 import static org.reflections.ReflectionUtils.getAllFields;
 import static org.reflections.ReflectionUtils.withType;
@@ -10,12 +10,11 @@ import java.util.List;
 
 import org.reflections.Reflections;
 
-import btc.exchange.client.requesthandlers.Exchange;
-import btc.exchange.client.requesthandlers.ExchangeApiRequestHandler;
-
 import com.google.common.util.concurrent.AbstractScheduledService;
 import com.google.common.util.concurrent.Service;
 
+import exchange.client.requesthandlers.Exchange;
+import exchange.client.requesthandlers.ExchangeApiRequestHandler;
 import framework.ServiceLoader;
 
 public class IngestorServiceLoader implements ServiceLoader {

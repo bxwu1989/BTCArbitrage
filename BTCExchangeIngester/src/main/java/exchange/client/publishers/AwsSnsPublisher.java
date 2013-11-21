@@ -1,14 +1,14 @@
-package btc.exchange.client.publishers;
+package exchange.client.publishers;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import btc.exchange.client.AWSClients;
-import btc.exchange.client.ExchangeConfig;
-
 import com.amazonaws.services.sns.model.PublishRequest;
 import com.amazonaws.services.sns.model.Topic;
 import com.google.common.util.concurrent.AbstractScheduledService;
+
+import exchange.client.AWSClients;
+import exchange.client.ExchangeConfig;
 
 public abstract class AwsSnsPublisher extends AbstractScheduledService {
 
