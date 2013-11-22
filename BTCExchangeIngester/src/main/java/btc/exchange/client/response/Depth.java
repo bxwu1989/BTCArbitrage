@@ -3,6 +3,9 @@ package btc.exchange.client.response;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
+
 /**
  * For Bids and Asks there is a list of Price and Quantity.
  */
@@ -11,8 +14,8 @@ public class Depth {
     private List<PriceQuantity> asks;
     
     public Depth() {
-    	this.bids = new ArrayList<PriceQuantity>();
-    	this.asks = new ArrayList<PriceQuantity>();
+    	this.bids = new ArrayList<>();
+    	this.asks = new ArrayList<>();
     }
     public Depth(List<PriceQuantity> bids, List<PriceQuantity> asks) {
         this.bids = bids;
@@ -62,32 +65,12 @@ public class Depth {
 
 		@Override
 		public int hashCode() {
-			final int prime = 31;
-			int result = 1;
-			long temp;
-			temp = Double.doubleToLongBits(price);
-			result = prime * result + (int) (temp ^ (temp >>> 32));
-			temp = Double.doubleToLongBits(quantity);
-			result = prime * result + (int) (temp ^ (temp >>> 32));
-			return result;
+			return HashCodeBuilder.reflectionHashCode(this);
 		}
 
 		@Override
 		public boolean equals(Object obj) {
-			if (this == obj)
-				return true;
-			if (obj == null)
-				return false;
-			if (getClass() != obj.getClass())
-				return false;
-			PriceQuantity other = (PriceQuantity) obj;
-			if (Double.doubleToLongBits(price) != Double
-					.doubleToLongBits(other.price))
-				return false;
-			if (Double.doubleToLongBits(quantity) != Double
-					.doubleToLongBits(other.quantity))
-				return false;
-			return true;
+			return EqualsBuilder.reflectionEquals(this, obj);
 		}
 	}
 	
