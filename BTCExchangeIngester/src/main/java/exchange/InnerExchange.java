@@ -2,6 +2,7 @@ package exchange;
 
 import java.util.EnumMap;
 import java.util.EnumSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -44,17 +45,47 @@ public enum InnerExchange {
 		return ImmutableList.<Currency>builder().add(sourceCurrency, destinationCurrency).build();
 	}
 	
+	public static InnerExchange getInnerExchange(Currency source, Currency destination) { 
+		final Iterator<InnerExchange> iter = Sets.intersection(innerExchangesForSourceCurrency.get(source), innerExchangesForDestinationCurrency.get(destination)).iterator();
+		if (iter.hasNext()) {
+			return iter.next();
+		}
+		return null;
+	}
+
+	private static Map<Currency, Set<InnerExchange>> innerExchangesForSourceCurrency = new EnumMap<>(Currency.class);
+	private static Map<Currency, Set<InnerExchange>> innerExchangesForDestinationCurrency = new EnumMap<>(Currency.class);
 	private static Map<Currency, Set<InnerExchange>> innerExchangesForCurrency = new EnumMap<>(Currency.class);
 	static {
 		for (InnerExchange innerEx : values()) {
-			for (Currency currency : innerEx.getCurrencies()) {
-				Set<InnerExchange> innerExs = innerExchangesForCurrency.get(currency);
-				if (innerExs == null) {
-					innerExs = EnumSet.noneOf(InnerExchange.class);
-					innerExchangesForCurrency.put(currency, innerExs);
-				}
-				innerExs.add(innerEx);
+			final Currency sourceCurrency = innerEx.getSourceCurrency();
+			Set<InnerExchange> innerExsForSource = innerExchangesForSourceCurrency.get(sourceCurrency);
+			if (innerExsForSource == null) {
+				innerExsForSource = EnumSet.noneOf(InnerExchange.class);
+				innerExchangesForSourceCurrency.put(sourceCurrency, innerExsForSource);
 			}
+			innerExsForSource.add(innerEx);
+			
+			final Currency destinationCurrency = innerEx.getDestinationCurrency();
+			Set<InnerExchange> innerExsForDestination = innerExchangesForDestinationCurrency.get(destinationCurrency);
+			if (innerExsForDestination == null) {
+				innerExsForDestination = EnumSet.noneOf(InnerExchange.class);
+				innerExchangesForDestinationCurrency.put(destinationCurrency, innerExsForDestination);
+			}
+			innerExsForDestination.add(innerEx);
+			
+			innerExsForSource = innerExchangesForCurrency.get(sourceCurrency);
+			if (innerExsForSource == null) {
+				innerExsForSource = EnumSet.noneOf(InnerExchange.class);
+				innerExchangesForCurrency.put(sourceCurrency, innerExsForSource);
+			}
+			innerExsForSource.add(innerEx);
+			innerExsForDestination = innerExchangesForCurrency.get(destinationCurrency);
+			if (innerExsForDestination == null) {
+				innerExsForDestination = EnumSet.noneOf(InnerExchange.class);
+				innerExchangesForCurrency.put(destinationCurrency, innerExsForDestination);
+			}
+			innerExsForDestination.add(innerEx);
 		}
 	}
 	

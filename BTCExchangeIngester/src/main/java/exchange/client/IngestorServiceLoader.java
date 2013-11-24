@@ -2,6 +2,7 @@ package exchange.client;
 
 import static org.reflections.ReflectionUtils.getAllFields;
 import static org.reflections.ReflectionUtils.withType;
+import static org.reflections.ReflectionUtils.withName;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
@@ -11,10 +12,12 @@ import java.util.List;
 import org.reflections.Reflections;
 
 import com.google.common.util.concurrent.AbstractScheduledService;
+import com.google.common.util.concurrent.AbstractScheduledService.Scheduler;
 import com.google.common.util.concurrent.Service;
 
 import exchange.client.requesthandlers.ExchangeApiRequestHandler;
 import exchange.client.requesthandlers.ExchangeTag;
+import exchange.configuration.ExchangeApiConfig;
 import framework.ServiceLoader;
 
 public class IngestorServiceLoader implements ServiceLoader {
@@ -38,14 +41,25 @@ public class IngestorServiceLoader implements ServiceLoader {
 	private void initializeAllExchangeScheduledServices() {
 		final Reflections reflections = new Reflections("exchange.client");    		
 		for ( final Class<?> exchangeRequestHandlersClass : reflections.getTypesAnnotatedWith(ExchangeTag.class)) {
-			final Exchange exchangeConfig = exchangeRequestHandlersClass.getAnnotation(ExchangeTag.class).value();			
+			
+			final Exchange exchange = exchangeRequestHandlersClass.getAnnotation(ExchangeTag.class).value();	
+			
 			for ( final Class<?> innerExchangeClass : exchangeRequestHandlersClass.getDeclaredClasses()) {
+				
 				if (innerExchangeClass.getSuperclass().equals(ExchangeApiRequestHandler.class)) {
 					try {
 						final ExchangeApiRequestHandler scheduledService = (ExchangeApiRequestHandler) Class.forName(innerExchangeClass.getName()).newInstance();
 						for ( final Field field : getAllFields(ExchangeApiRequestHandler.class, withType(Exchange.class)) ) {							
 							field.setAccessible(true);
-							field.set(scheduledService, exchangeConfig);
+							field.set(scheduledService, exchange);
+						}
+						for ( final Field field : getAllFields(ExchangeApiRequestHandler.class, withType(Scheduler.class)) ) {							
+							field.setAccessible(true);
+							field.set(scheduledService, ExchangeApiConfig.getDefaultApiTimeoutScheduler(exchange));
+						}
+						for ( final Field field : getAllFields(ExchangeApiRequestHandler.class, withType(String.class), withName("connectionString")) ) {							
+							field.setAccessible(true);
+							field.set(scheduledService, ExchangeApiConfig.getApiString(exchange));
 						}
 						ALL_SERVICES.add(scheduledService);
 					} catch (InstantiationException | IllegalAccessException

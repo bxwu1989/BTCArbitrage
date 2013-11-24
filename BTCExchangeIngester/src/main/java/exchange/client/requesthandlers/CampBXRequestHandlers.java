@@ -1,7 +1,6 @@
 package exchange.client.requesthandlers;
 
 import java.util.Iterator;
-import java.util.concurrent.TimeUnit;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
@@ -23,12 +22,7 @@ public final class CampBXRequestHandlers {
 		public void handleResponse(final String jsonResponse) {
 			final JsonObject jsonObject = new JsonParser().parse(jsonResponse).getAsJsonObject();
 			final MarketDepth marketDepth = buildMarketDepthFromJson(jsonObject.get("Bids").getAsJsonArray(), jsonObject.get("Asks").getAsJsonArray());
-			EXCHANGE_CONFIG.updateBiDirectionalMarketDepth(Currency.USD, Currency.BTC, marketDepth);
-		}
-
-		@Override
-		protected Scheduler scheduler() {
-			return Scheduler.newFixedRateSchedule(0, 30000, TimeUnit.MILLISECONDS); // TODO pull from config
+			exchange.updateMarketDepth(Currency.USD, Currency.BTC, marketDepth);
 		}
 
 		@Override
@@ -54,19 +48,13 @@ public final class CampBXRequestHandlers {
 	}
 	
 	public static final class CampBXTickerScheduledServiceRequest extends ExchangeApiRequestHandler {
-		// last trade price and quantity
 		@Override
 		public void handleResponse(final String jsonResponse) {
 			final JsonObject jsonObject = new JsonParser().parse(jsonResponse).getAsJsonObject();
 	        final double lastTrade = jsonObject.get("Last Trade").getAsDouble();
 	        final double bestBid = jsonObject.get("Best Bid").getAsDouble();
 	        final double bestAsk = jsonObject.get("Best Ask").getAsDouble();
-	        EXCHANGE_CONFIG.updateTicker(new Ticker(lastTrade, bestBid, bestAsk));
-		}
-
-		@Override
-		protected Scheduler scheduler() {
-			return Scheduler.newFixedRateSchedule(0, 1000, TimeUnit.MILLISECONDS); // TODO pull from config
+	        exchange.updateTicker(new Ticker(lastTrade, bestBid, bestAsk));
 		}
 
 		@Override

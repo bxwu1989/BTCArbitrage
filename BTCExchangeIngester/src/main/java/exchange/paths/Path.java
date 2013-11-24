@@ -1,6 +1,9 @@
 package exchange.paths;
 
+import java.util.EnumMap;
 import java.util.HashSet;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
@@ -10,6 +13,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableList.Builder;
 import com.google.common.collect.Ordering;
 
+import exchange.InnerExchange;
 import exchange.client.Exchange;
 import exchange.currency.CurrencyQuantDelegate;
 import exchange.currency.CurrencyType;
@@ -81,7 +85,7 @@ public class Path {
 	
 	static class PathBuilder {
 		private final ImmutableList<ExchangeActionNode> exActionNodes;
-		private final Set<Exchange> exchangesInPath = new HashSet<Exchange>();
+		private final Map<Exchange, Set<InnerExchange>> innerExchangesInPath = new EnumMap<>(Exchange.class);
 		private final int depth;
 		private final int maxDepth;
 		
@@ -89,11 +93,13 @@ public class Path {
 			this.exActionNodes = ImmutableList.<ExchangeActionNode>builder().add(initialExActionNode).build();
 			this.maxDepth = maxDepth;
 			this.depth = 0;
-			this.exchangesInPath.add(initialExActionNode.getExchange());
+			
+			final Set<InnerExchange> innerExs = new HashSet<>();
+			innerExs.add(InnerExchange.getInnerExchange(initialExActionNode.getSourceCurrency(), initialExActionNode.getDestinationCurrency()));
+			innerExchangesInPath.put(initialExActionNode.getExchange(), innerExs);
 		}
 		
-		private PathBuilder(ImmutableList<ExchangeActionNode> exActionNodes,
-				Set<Exchange> exchangesInPath,
+		private PathBuilder(ImmutableList<ExchangeActionNode> exActionNodes, Map<Exchange, Set<InnerExchange>> innerExchangesInPath,
 				ExchangeActionNode latestExActionNode, int maxDepth, int depth) {
 			final Builder<ExchangeActionNode> listBuilder = ImmutableList.builder();
 			for (final ExchangeActionNode exActionNode : exActionNodes) { 
@@ -101,14 +107,33 @@ public class Path {
 			}
 			listBuilder.add(latestExActionNode);
 			this.exActionNodes = listBuilder.build();
-			this.exchangesInPath.addAll(exchangesInPath);
-			this.exchangesInPath.add(latestExActionNode.getExchange());	
+			for (Entry<Exchange, Set<InnerExchange>> entry : innerExchangesInPath.entrySet()) {
+				for (InnerExchange innerEx : entry.getValue()) {
+					updateInnerExchangesPerExchange(entry.getKey(), innerEx);
+				}
+			}
+			updateInnerExchangesPerExchange(latestExActionNode);
 			this.maxDepth = maxDepth;
 			this.depth = depth+1;
 		}
 		
+		private void updateInnerExchangesPerExchange(ExchangeActionNode exchangeActionNode) {
+			updateInnerExchangesPerExchange(exchangeActionNode.getExchange(), 
+					InnerExchange.getInnerExchange(exchangeActionNode.getSourceCurrency(), exchangeActionNode.getDestinationCurrency()));
+		}
+		private void updateInnerExchangesPerExchange(Exchange ex, InnerExchange innerEx) {
+			if (innerEx != null) {
+				Set<InnerExchange> innerExs = innerExchangesInPath.get(ex);
+				if (innerExs == null) {
+					innerExs = new HashSet<>();
+					innerExchangesInPath.put(ex, innerExs);
+				}
+				innerExs.add(innerEx);
+			}
+		}
+		
 		private PathBuilder copy(ExchangeActionNode latestExActionNode) {
-			return new PathBuilder(exActionNodes, exchangesInPath, latestExActionNode, maxDepth, depth);
+			return new PathBuilder(exActionNodes, innerExchangesInPath, latestExActionNode, maxDepth, depth);
 		};
 		
 		public boolean checkIfEndOfPathReachedWithNode() {
@@ -140,8 +165,8 @@ public class Path {
 		}
 		
 		private void registerPathWithExchanges(Path path) {
-			for (final Exchange ex : exchangesInPath) {
-				ex.registerPathForUpdate(path);
+			for (final Entry<Exchange, Set<InnerExchange>> entry : innerExchangesInPath.entrySet()) {
+				entry.getKey().registerPathForUpdate(path, entry.getValue());
 			}
 		}
 		

@@ -19,7 +19,9 @@ import exchange.client.Exchange;
 
 public abstract class ExchangeApiRequestHandler extends AbstractScheduledService {
 
-	protected Exchange EXCHANGE_CONFIG;
+	protected Exchange exchange;
+	private Scheduler timeoutScheduler;
+	private String connectionString;
 	private static final PoolingHttpClientConnectionManager CM = new PoolingHttpClientConnectionManager();
     static {
     	CM.setMaxTotal(Exchange.values().length);
@@ -37,6 +39,11 @@ public abstract class ExchangeApiRequestHandler extends AbstractScheduledService
 		} catch (IOException e1) {
 			e1.printStackTrace();
 		} 		
+	}
+	
+	@Override
+	protected Scheduler scheduler() {
+		return timeoutScheduler; // TODO pull from config
 	}
 	
 	private static final ResponseHandler<String> DEFAULT_REQUEST_HANDLER = new ResponseHandler<String>() {
@@ -60,7 +67,7 @@ public abstract class ExchangeApiRequestHandler extends AbstractScheduledService
 	private HttpGet tickerHttpGet;	
 	protected HttpRequestBase getHttpRequest() {
 		if (tickerHttpGet == null) {
-			tickerHttpGet = new HttpGet( EXCHANGE_CONFIG.getBaseApiConnectionString() + getApiMethodPath() );
+			tickerHttpGet = new HttpGet( connectionString + getApiMethodPath() );
 		}
 		return tickerHttpGet;
 	}
