@@ -2,9 +2,9 @@ package exchange.client.requesthandlers;
 
 import java.util.concurrent.TimeUnit;
 
-import exchange.client.ExchangeConfig;
+import exchange.client.Exchange;
 
-@Exchange(ExchangeConfig.MTGOX)
+@ExchangeTag(Exchange.MTGOX)
 public class MtGoxRequestHandlers {
 	
 	public static final class MtGoxTickerscheduledServiceRequest extends ExchangeApiRequestHandler {

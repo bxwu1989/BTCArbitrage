@@ -9,6 +9,7 @@ import com.google.common.util.concurrent.ServiceManager;
 import com.google.common.util.concurrent.ServiceManager.Listener;
 
 import exchange.client.IngestorServiceLoader;
+import exchange.paths.PathLoader;
 
 public class ManagedServiceManager {	
 
@@ -62,6 +63,7 @@ public class ManagedServiceManager {
 	};
 	
 	public static void main(String[] args) throws InterruptedException {
+		PathLoader.loadPaths();
 		final ManagedServiceManager managedServicemanager = new ManagedServiceManager(IngestorServiceLoader.getInstance());
 		managedServicemanager.start();
 	}

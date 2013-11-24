@@ -8,11 +8,11 @@ import com.amazonaws.services.sns.model.Topic;
 import com.google.common.util.concurrent.AbstractScheduledService;
 
 import exchange.client.AWSClients;
-import exchange.client.ExchangeConfig;
+import exchange.client.Exchange;
 
 public abstract class AwsSnsPublisher extends AbstractScheduledService {
 
-	public abstract String getMessageBody(ExchangeConfig exConfig);
+	public abstract String getMessageBody(Exchange exConfig);
 	public abstract Pattern getTopicArnPattern();
 	
 	@Override
@@ -20,7 +20,7 @@ public abstract class AwsSnsPublisher extends AbstractScheduledService {
 		for (final Topic topic : AWSClients.getSNSClient().listTopics().getTopics()) {
 			final Matcher arbitragePatternMatcher = getTopicArnPattern().matcher(topic.getTopicArn());
 			if (arbitragePatternMatcher.matches()) {
-				final ExchangeConfig exConfig = ExchangeConfig.valueOf(arbitragePatternMatcher.group(1).toUpperCase());
+				final Exchange exConfig = Exchange.valueOf(arbitragePatternMatcher.group(1).toUpperCase());
 				final PublishRequest request = new PublishRequest(topic.getTopicArn(), getMessageBody(exConfig));
 				AWSClients.getSNSClient().publish(request);
 			}

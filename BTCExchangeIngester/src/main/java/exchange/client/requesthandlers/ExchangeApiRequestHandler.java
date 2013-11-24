@@ -1,7 +1,6 @@
 package exchange.client.requesthandlers;
 
 import java.io.IOException;
-import java.net.URISyntaxException;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
@@ -9,7 +8,6 @@ import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.ResponseHandler;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpRequestBase;
-import org.apache.http.client.utils.URIBuilder;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
@@ -17,14 +15,14 @@ import org.apache.http.util.EntityUtils;
 
 import com.google.common.util.concurrent.AbstractScheduledService;
 
-import exchange.client.ExchangeConfig;
+import exchange.client.Exchange;
 
 public abstract class ExchangeApiRequestHandler extends AbstractScheduledService {
 
-	protected ExchangeConfig EXCHANGE_CONFIG;
+	protected Exchange EXCHANGE_CONFIG;
 	private static final PoolingHttpClientConnectionManager CM = new PoolingHttpClientConnectionManager();
     static {
-    	CM.setMaxTotal(ExchangeConfig.values().length);
+    	CM.setMaxTotal(Exchange.values().length);
     }
 	private final CloseableHttpClient httpClient = HttpClients.custom().setConnectionManager(CM).build();
 	
@@ -35,7 +33,6 @@ public abstract class ExchangeApiRequestHandler extends AbstractScheduledService
 	@Override
 	protected final void runOneIteration() throws Exception {
 		try {
-			System.out.println(getHttpRequest());
 			handleResponse(httpClient.execute(getHttpRequest(), DEFAULT_REQUEST_HANDLER));
 		} catch (IOException e1) {
 			e1.printStackTrace();
@@ -63,12 +60,7 @@ public abstract class ExchangeApiRequestHandler extends AbstractScheduledService
 	private HttpGet tickerHttpGet;	
 	protected HttpRequestBase getHttpRequest() {
 		if (tickerHttpGet == null) {
-			try {
-				tickerHttpGet = new HttpGet( new URIBuilder(EXCHANGE_CONFIG.getBaseURI())
-					.setPath(EXCHANGE_CONFIG.getBaseURI().getPath() + getApiMethodPath()).build() );
-			} catch (URISyntaxException e) {
-				e.printStackTrace();
-			}
+			tickerHttpGet = new HttpGet( EXCHANGE_CONFIG.getBaseApiConnectionString() + getApiMethodPath() );
 		}
 		return tickerHttpGet;
 	}

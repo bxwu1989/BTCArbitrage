@@ -3,13 +3,13 @@ package exchange.client.publishers;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 
-import exchange.client.ExchangeConfig;
+import exchange.client.Exchange;
 
 public class AwsSnsArbitragePotentialPublisher extends AwsSnsPublisher {
 
 	@Override
-	public String getMessageBody(ExchangeConfig exConfig) {
-		return exConfig.getDepth().toString();
+	public String getMessageBody(Exchange exConfig) {
+		return "test";
 	}
 
 	private static final Pattern ARBITRAGE_TOPIC_PATTERN = Pattern.compile(

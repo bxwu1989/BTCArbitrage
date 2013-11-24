@@ -13,8 +13,8 @@ import org.reflections.Reflections;
 import com.google.common.util.concurrent.AbstractScheduledService;
 import com.google.common.util.concurrent.Service;
 
-import exchange.client.requesthandlers.Exchange;
 import exchange.client.requesthandlers.ExchangeApiRequestHandler;
+import exchange.client.requesthandlers.ExchangeTag;
 import framework.ServiceLoader;
 
 public class IngestorServiceLoader implements ServiceLoader {
@@ -36,14 +36,14 @@ public class IngestorServiceLoader implements ServiceLoader {
 	
 	@SuppressWarnings("unchecked")
 	private void initializeAllExchangeScheduledServices() {
-		final Reflections reflections = new Reflections("btc.exchange.client");    		
-		for ( final Class<?> exchangeRequestHandlersClass : reflections.getTypesAnnotatedWith(Exchange.class)) {
-			final ExchangeConfig exchangeConfig = exchangeRequestHandlersClass.getAnnotation(Exchange.class).value();			
+		final Reflections reflections = new Reflections("exchange.client");    		
+		for ( final Class<?> exchangeRequestHandlersClass : reflections.getTypesAnnotatedWith(ExchangeTag.class)) {
+			final Exchange exchangeConfig = exchangeRequestHandlersClass.getAnnotation(ExchangeTag.class).value();			
 			for ( final Class<?> innerExchangeClass : exchangeRequestHandlersClass.getDeclaredClasses()) {
 				if (innerExchangeClass.getSuperclass().equals(ExchangeApiRequestHandler.class)) {
 					try {
 						final ExchangeApiRequestHandler scheduledService = (ExchangeApiRequestHandler) Class.forName(innerExchangeClass.getName()).newInstance();
-						for ( final Field field : getAllFields(ExchangeApiRequestHandler.class, withType(ExchangeConfig.class)) ) {							
+						for ( final Field field : getAllFields(ExchangeApiRequestHandler.class, withType(Exchange.class)) ) {							
 							field.setAccessible(true);
 							field.set(scheduledService, exchangeConfig);
 						}
