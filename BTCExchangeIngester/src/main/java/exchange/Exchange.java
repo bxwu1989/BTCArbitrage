@@ -1,4 +1,4 @@
-package exchange.client;
+package exchange;
 
 import java.util.EnumSet;
 import java.util.HashMap;
@@ -9,9 +9,8 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import com.google.common.collect.Sets;
 
-import exchange.InnerExchange;
-import exchange.client.response.MarketDepth;
-import exchange.client.response.Ticker;
+import exchange.services.response.MarketDepth;
+import exchange.services.response.Ticker;
 import exchange.configuration.ExchangeExchangeConfig;
 import exchange.configuration.ExchangeFeeConfig;
 import exchange.currency.Currency;

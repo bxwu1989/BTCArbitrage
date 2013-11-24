@@ -1,4 +1,4 @@
-package exchange.client.requesthandlers;
+package exchange.services.requesthandlers;
 
 import java.util.Iterator;
 
@@ -7,10 +7,10 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
-import exchange.client.Exchange;
-import exchange.client.response.MarketDepth;
-import exchange.client.response.MarketDepth.MarketDepthBuilder;
-import exchange.client.response.Ticker;
+import exchange.Exchange;
+import exchange.services.response.MarketDepth;
+import exchange.services.response.MarketDepth.MarketDepthBuilder;
+import exchange.services.response.Ticker;
 import exchange.currency.Currency;
 
 @ExchangeTag(Exchange.CAMPBX)

@@ -1,6 +1,6 @@
 package exchange.paths;
 
-import exchange.client.Exchange;
+import exchange.Exchange;
 import exchange.currency.Currency;
 import exchange.currency.CurrencyQuantDelegate;
 

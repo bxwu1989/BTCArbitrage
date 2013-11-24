@@ -1,9 +1,9 @@
-package exchange.client.publishers;
+package exchange.services.publishers;
 
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 
-import exchange.client.Exchange;
+import exchange.Exchange;
 
 public class AwsSnsArbitragePotentialPublisher extends AwsSnsPublisher {
 

@@ -6,7 +6,7 @@ import java.util.concurrent.TimeUnit;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.util.concurrent.AbstractScheduledService.Scheduler;
 
-import exchange.client.Exchange;
+import exchange.Exchange;
 
 public class ExchangeApiConfig {
 

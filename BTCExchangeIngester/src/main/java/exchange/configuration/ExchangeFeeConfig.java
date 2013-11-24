@@ -7,8 +7,8 @@ import java.util.Map.Entry;
 
 import com.google.common.collect.ImmutableMap;
 
+import exchange.Exchange;
 import exchange.InnerExchange;
-import exchange.client.Exchange;
 import exchange.currency.Currency;
 import exchange.currency.CurrencyQuantDelegate;
 

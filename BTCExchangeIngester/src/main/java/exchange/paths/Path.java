@@ -13,8 +13,8 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableList.Builder;
 import com.google.common.collect.Ordering;
 
+import exchange.Exchange;
 import exchange.InnerExchange;
-import exchange.client.Exchange;
 import exchange.currency.CurrencyQuantDelegate;
 import exchange.currency.CurrencyType;
 

@@ -8,8 +8,8 @@ import java.util.Set;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Sets;
 
+import exchange.Exchange;
 import exchange.InnerExchange;
-import exchange.client.Exchange;
 import exchange.currency.Currency;
 
 public class ExchangeExchangeConfig {

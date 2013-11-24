@@ -1,4 +1,4 @@
-package exchange.client.requesthandlers;
+package exchange.services.requesthandlers;
 
 import java.io.IOException;
 
@@ -15,7 +15,7 @@ import org.apache.http.util.EntityUtils;
 
 import com.google.common.util.concurrent.AbstractScheduledService;
 
-import exchange.client.Exchange;
+import exchange.Exchange;
 
 public abstract class ExchangeApiRequestHandler extends AbstractScheduledService {
 

@@ -1,4 +1,4 @@
-package exchange.client;
+package exchange.services;
 
 import util.Configuration;
 

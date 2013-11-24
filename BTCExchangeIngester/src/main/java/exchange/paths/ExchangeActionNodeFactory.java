@@ -3,8 +3,8 @@ package exchange.paths;
 import java.util.EnumMap;
 import java.util.Map;
 
+import exchange.Exchange;
 import exchange.InnerExchange;
-import exchange.client.Exchange;
 import exchange.currency.Currency;
 
 public class ExchangeActionNodeFactory {

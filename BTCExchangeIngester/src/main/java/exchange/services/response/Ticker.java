@@ -1,4 +1,4 @@
-package exchange.client.response;
+package exchange.services.response;
 
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 

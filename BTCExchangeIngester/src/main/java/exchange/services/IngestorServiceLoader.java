@@ -1,4 +1,4 @@
-package exchange.client;
+package exchange.services;
 
 import static org.reflections.ReflectionUtils.getAllFields;
 import static org.reflections.ReflectionUtils.withType;
@@ -15,8 +15,9 @@ import com.google.common.util.concurrent.AbstractScheduledService;
 import com.google.common.util.concurrent.AbstractScheduledService.Scheduler;
 import com.google.common.util.concurrent.Service;
 
-import exchange.client.requesthandlers.ExchangeApiRequestHandler;
-import exchange.client.requesthandlers.ExchangeTag;
+import exchange.Exchange;
+import exchange.services.requesthandlers.ExchangeApiRequestHandler;
+import exchange.services.requesthandlers.ExchangeTag;
 import exchange.configuration.ExchangeApiConfig;
 import framework.ServiceLoader;
 
@@ -39,7 +40,7 @@ public class IngestorServiceLoader implements ServiceLoader {
 	
 	@SuppressWarnings("unchecked")
 	private void initializeAllExchangeScheduledServices() {
-		final Reflections reflections = new Reflections("exchange.client");    		
+		final Reflections reflections = new Reflections("exchange.services");    		
 		for ( final Class<?> exchangeRequestHandlersClass : reflections.getTypesAnnotatedWith(ExchangeTag.class)) {
 			
 			final Exchange exchange = exchangeRequestHandlersClass.getAnnotation(ExchangeTag.class).value();	
@@ -73,7 +74,7 @@ public class IngestorServiceLoader implements ServiceLoader {
 	}
 	
 	private void initializeAllPublishers() {
-		final Reflections reflections = new Reflections("btc.exchange.client.publishers");   
+		final Reflections reflections = new Reflections("exchange.services.publishers");   
 		for ( final Class<? extends AbstractScheduledService> scheduledServicePublishers : reflections.getSubTypesOf(AbstractScheduledService.class)) {
 			if (!Modifier.isAbstract( scheduledServicePublishers.getModifiers() )) {
 				try {

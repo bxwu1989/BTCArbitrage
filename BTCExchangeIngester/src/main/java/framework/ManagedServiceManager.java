@@ -8,7 +8,7 @@ import com.google.common.util.concurrent.Service;
 import com.google.common.util.concurrent.ServiceManager;
 import com.google.common.util.concurrent.ServiceManager.Listener;
 
-import exchange.client.IngestorServiceLoader;
+import exchange.services.IngestorServiceLoader;
 import exchange.paths.PathLoader;
 
 public class ManagedServiceManager {	

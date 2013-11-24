@@ -3,8 +3,8 @@ package exchange.paths;
 import java.util.ArrayList;
 import java.util.List;
 
+import exchange.Exchange;
 import exchange.InnerExchange;
-import exchange.client.Exchange;
 import exchange.currency.Currency;
 import exchange.currency.CurrencyQuantDelegate;
 import exchange.currency.CurrencyType;

@@ -1,8 +1,8 @@
-package exchange.client.requesthandlers;
+package exchange.services.requesthandlers;
 
 import java.util.concurrent.TimeUnit;
 
-import exchange.client.Exchange;
+import exchange.Exchange;
 
 @ExchangeTag(Exchange.MTGOX)
 public class MtGoxRequestHandlers {

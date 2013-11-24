@@ -1,4 +1,4 @@
-package exchange.client.publishers;
+package exchange.services.publishers;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -7,8 +7,8 @@ import com.amazonaws.services.sns.model.PublishRequest;
 import com.amazonaws.services.sns.model.Topic;
 import com.google.common.util.concurrent.AbstractScheduledService;
 
-import exchange.client.AWSClients;
-import exchange.client.Exchange;
+import exchange.Exchange;
+import exchange.services.AWSClients;
 
 public abstract class AwsSnsPublisher extends AbstractScheduledService {
 

@@ -1,4 +1,4 @@
-package exchange.client.response;
+package exchange.services.response;
 
 import java.util.SortedSet;
 
