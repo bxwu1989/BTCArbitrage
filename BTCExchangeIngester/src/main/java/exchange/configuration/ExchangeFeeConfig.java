@@ -4,8 +4,10 @@ import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Sets;
 
 import exchange.Exchange;
 import exchange.InnerExchange;
@@ -42,6 +44,7 @@ public class ExchangeFeeConfig {
 		// Transfer Fee Overrides
 		TRANSFER_FEES.get(Exchange.CAMPBX).put(Currency.BTC, Fee.getInstance(0, 0));
 		
+		validateConfig();
 	}
 	
 	public static Fee getTradeCommissionFee(Exchange exchange, InnerExchange innerExchange) {
@@ -122,8 +125,7 @@ public class ExchangeFeeConfig {
 			final Map<Currency, Fee> currencyTransferFeeMap = new EnumMap<>(Currency.class);
 			for (Currency currency : ExchangeExchangeConfig.getExchangeCurrencies(ex)) {
 				switch(currency.getType()) {
-				case Non_Crypto:
-				case Crypto:
+				case Digital:
 					currencyTransferFeeMap.put(currency, defaults.get(ex));
 					break;
 				case Fiat:
@@ -135,5 +137,19 @@ public class ExchangeFeeConfig {
 		}
 		TRANSFER_FEES = builder.build();
 	}
+	
+	private static void validateConfig() {
+		Set<Exchange> unConfiguredExchanges = Sets.complementOf(TRADE_COMMISSIONS.keySet());
+		if (!unConfiguredExchanges.isEmpty()) {
+			throw new IllegalStateException("Missing trading commission configuration for: " + unConfiguredExchanges);		
+		}
+		unConfiguredExchanges = Sets.complementOf(TRANSFER_FEES.keySet());
+		if (!unConfiguredExchanges.isEmpty()) {
+			throw new IllegalStateException("Missing transfer fee configuration for: " + unConfiguredExchanges);		
+		}
+	}
 	private ExchangeFeeConfig() {}
+	
 }
+
+

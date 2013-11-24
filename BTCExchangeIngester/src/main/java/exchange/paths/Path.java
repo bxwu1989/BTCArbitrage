@@ -83,6 +83,27 @@ public class Path {
 		}		
 	}).reverse();
 	
+/*	private static final Map<Exchange, Map<InnerExchange, Set<Path>>> exchangeInnerExchangePathReferences;
+	static {
+		ImmutableMap.Builder<Exchange, Map<InnerExchange, Set<Path>>> exchangeInnerExchangePathReferencesBuilder = ImmutableMap.builder();
+		for (Exchange ex : Exchange.values()) {
+			ImmutableMap.Builder<InnerExchange, Set<Path>> innerExchangePathReferencesBuilder = ImmutableMap.builder();
+			for (InnerExchange innerEx : ExchangeExchangeConfig.getInnerExchanges(ex)) {
+				innerExchangePathReferencesBuilder.put(innerEx, new HashSet<Path>());
+			}
+			exchangeInnerExchangePathReferencesBuilder.put(ex, innerExchangePathReferencesBuilder.build());
+		}
+		exchangeInnerExchangePathReferences = exchangeInnerExchangePathReferencesBuilder.build();
+	}
+	
+	public static void updatePaths(Exchange ex, Set<InnerExchange> innerExs) {
+		for (InnerExchange innerEx : innerExs) {
+			for (Path path : exchangeInnerExchangePathReferences.get(ex).get(innerEx)) {
+				path.updateFinalQuantity();
+			}
+		}
+	}*/
+	
 	static class PathBuilder {
 		private final ImmutableList<ExchangeActionNode> exActionNodes;
 		private final Map<Exchange, Set<InnerExchange>> innerExchangesInPath = new EnumMap<>(Exchange.class);
@@ -158,16 +179,10 @@ public class Path {
 							null : addNode(actionNode);
 		}
 		
-		public Path build(final CurrencyQuantDelegate orginalQuantity) {
+		public Path buildAndRegisterWithExchangesInnerExchanges(final CurrencyQuantDelegate orginalQuantity) {
 			final Path path = new Path(exActionNodes, orginalQuantity);
-			registerPathWithExchanges(path);
+			Exchange.registerPathsWithExchangesInnerExchanges(path, innerExchangesInPath);
 			return path;
-		}
-		
-		private void registerPathWithExchanges(Path path) {
-			for (final Entry<Exchange, Set<InnerExchange>> entry : innerExchangesInPath.entrySet()) {
-				entry.getKey().registerPathForUpdate(path, entry.getValue());
-			}
 		}
 		
 		public ExchangeActionNode getLastExchangeActionNode() {

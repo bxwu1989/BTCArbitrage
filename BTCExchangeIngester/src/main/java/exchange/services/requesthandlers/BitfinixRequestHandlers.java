@@ -16,10 +16,8 @@ import exchange.services.response.MarketDepth.MarketDepthBuilder;
 public class BitfinixRequestHandlers {
 
 	public static final class BitfinixMarketDepthScheduledServiceRequest extends ExchangeApiRequestHandler  {
-
 		@Override
 		public void handleResponse(final String jsonResponse) {
-		//	System.out.println(jsonResponse);
 			final JsonObject jsonObject = new JsonParser().parse(jsonResponse).getAsJsonObject();
 			final MarketDepth marketDepth = buildMarketDepthFromJson(jsonObject.get("bids").getAsJsonArray(), jsonObject.get("asks").getAsJsonArray());
 			exchange.updateMarketDepth(Currency.USD, Currency.BTC, marketDepth);

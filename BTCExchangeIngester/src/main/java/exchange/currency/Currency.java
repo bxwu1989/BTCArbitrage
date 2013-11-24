@@ -9,10 +9,10 @@ public enum Currency {
 
 	USD(CurrencyType.Fiat),
 	
-	BTC(CurrencyType.Crypto),
-	LTC(CurrencyType.Crypto),
+	BTC(CurrencyType.Digital),
+	LTC(CurrencyType.Digital),
 	
-	XRP(CurrencyType.Non_Crypto);
+	XRP(CurrencyType.Digital);
 	
 	private final CurrencyType type;
 	

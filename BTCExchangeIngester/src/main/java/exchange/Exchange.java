@@ -4,20 +4,21 @@ import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Sets;
 
-import exchange.services.response.MarketDepth;
-import exchange.services.response.Ticker;
 import exchange.configuration.ExchangeExchangeConfig;
 import exchange.configuration.ExchangeFeeConfig;
 import exchange.currency.Currency;
 import exchange.currency.CurrencyQuantDelegate;
 import exchange.currency.CurrencyType;
 import exchange.paths.Path;
+import exchange.services.response.MarketDepth;
+import exchange.services.response.Ticker;
 
 public enum Exchange {
 	CAMPBX,
@@ -25,21 +26,16 @@ public enum Exchange {
 	BITSTAMP;
 
 	// Active Exchange Data
-	private final Map<Integer, MarketDepth> innerExchangeDepths = new HashMap<Integer, MarketDepth>();
-	
+	private final Map<Integer, MarketDepth> innerExchangeMarketDepths = new ConcurrentHashMap<Integer, MarketDepth>();	
 	private final Ticker ticker = new Ticker();
 	
 	private Exchange() {	
 	}
 	
 	public void updateMarketDepth(Currency source, Currency dest, MarketDepth marketDepth) {
-		final Set<Path> paths = new HashSet<Path>();
-		for (InnerExchange innerEx : ExchangeExchangeConfig.getInnerExchangesForCurrenciesIntersection(this,EnumSet.of(source, dest))) {
-			paths.addAll(pathsToUpdate.get(innerEx));
-			innerExchangeDepths.put(innerEx.getDirectionlessHashCode(), marketDepth);
-		}
-
-		updatePaths(paths);	
+		final InnerExchange innerEx = ExchangeExchangeConfig.getInnerExchange(this, source, dest);
+		innerExchangeMarketDepths.put(innerEx.getDirectionlessHashCode(), marketDepth);
+		updatePaths(this, innerEx);
 	}
 	
 	public void updateTicker(Ticker ticker) {
@@ -51,18 +47,17 @@ public enum Exchange {
 	}
 	
 	public CurrencyQuantDelegate convertAmount(CurrencyQuantDelegate quantity, InnerExchange innerExchange) {
-		CurrencyQuantDelegate convertedQuant = null;
-		final MarketDepth marketDepth = innerExchangeDepths.get(innerExchange.getDirectionlessHashCode());
+		final MarketDepth marketDepth = innerExchangeMarketDepths.get(innerExchange.getDirectionlessHashCode());
 		if (marketDepth == null) return CurrencyQuantDelegate.getCurrencyQuant(0);
 		
-		quantity = ExchangeFeeConfig.getTradeCommissionFee(this, innerExchange).getQuantityAfterAppliedFee(quantity);
+		CurrencyQuantDelegate convertedQuant = ExchangeFeeConfig.getTradeCommissionFee(this, innerExchange).getQuantityAfterAppliedFee(quantity);
 		switch (innerExchange.getSourceCurrency().getType()) {
 		case Fiat:
-			convertedQuant = marketDepth.consumeAsks(quantity);
+			convertedQuant = marketDepth.consumeAsks(convertedQuant);
 			break;
-		case Non_Crypto:
-		case Crypto:
-			convertedQuant = marketDepth.consumeBids(quantity);
+		case Digital:
+			convertedQuant = marketDepth.consumeBids(convertedQuant);
+			break;
 		}
 		return convertedQuant;
 	}
@@ -71,45 +66,44 @@ public enum Exchange {
 		return ExchangeFeeConfig.getTransferFee(this, currency).getAppliedFeeQuantity(quantity);
 	}
 	
-	public Set<InnerExchange> getInnerExchangesForConvertingWith(CurrencyType currencyType) {
-		final Set<InnerExchange> innerExchangesForConvertingCurrencyType = EnumSet.noneOf(InnerExchange.class);
-		for (InnerExchange innerExchange : ExchangeExchangeConfig.getInnerExchanges(this)) {
-			if (innerExchange.getSourceCurrency().getType().equals(currencyType)) {
-				innerExchangesForConvertingCurrencyType.add(innerExchange);
-			}
-		}
-		return innerExchangesForConvertingCurrencyType;
+	public Set<InnerExchange> getInnerExchangesForConvertingWith(CurrencyType sourceCurrencyType) {
+		return ExchangeExchangeConfig.getInnerExchangesForConvertingWith(this, sourceCurrencyType);
 	}
 	
-	public Set<InnerExchange> getInnerExchangesForConvertingWith(Currency currency) {
-		final Set<InnerExchange> innerExchangesForConvertingCurrency = EnumSet.noneOf(InnerExchange.class);
-		for (InnerExchange innerExchange : ExchangeExchangeConfig.getInnerExchanges(this)) {
-			if (innerExchange.getSourceCurrency().equals(currency)) {
-				innerExchangesForConvertingCurrency.add(innerExchange);
-			}
-		}
-		return innerExchangesForConvertingCurrency;
+	public Set<InnerExchange> getInnerExchangesForConvertingWith(Currency sourceCurrency) {
+		return ExchangeExchangeConfig.getInnerExchangesForConvertingWith(this, sourceCurrency);
 	}
 	
 	public Set<Exchange> getDestinationExchangesForCurrency(Currency currency) {
+		if (!currency.getType().equals(CurrencyType.Digital)) throw new IllegalArgumentException("Only digital currencies are allowed for transfering. Can not transfer currency " + currency);
 		return Sets.difference(ExchangeExchangeConfig.getExchangesForCurrency(currency), EnumSet.of(this));
 	}
-	
-	private final Map<InnerExchange, Set<Path>> pathsToUpdate = new ConcurrentHashMap<>();
-	public void registerPathForUpdate(Path path, Set<InnerExchange> innerExchanges) {
-		for (InnerExchange innerEx : innerExchanges) { 
-			Set<Path> paths = pathsToUpdate.get(innerEx);
-			if (paths == null) {
-				paths = new HashSet<>();
-				pathsToUpdate.put(innerEx, paths);
+
+	private static final Map<Exchange, Map<Integer, Set<Path>>> exchangeInnerExchangePathReferences;
+	static {
+		ImmutableMap.Builder<Exchange, Map<Integer, Set<Path>>> exchangeInnerExchangePathReferencesBuilder = ImmutableMap.builder();
+		for (Exchange ex : Exchange.values()) {
+			Map<Integer, Set<Path>> innerExchangePathReferences = new HashMap<>();
+			for (InnerExchange innerEx : ExchangeExchangeConfig.getInnerExchanges(ex)) {
+				innerExchangePathReferences.put(innerEx.getDirectionlessHashCode(), new HashSet<Path>());
 			}
-			paths.add(path);
+
+			exchangeInnerExchangePathReferencesBuilder.put(ex, innerExchangePathReferences);
+		}
+		exchangeInnerExchangePathReferences = exchangeInnerExchangePathReferencesBuilder.build();
+	}
+	
+	private static void updatePaths(Exchange ex, InnerExchange innerEx) {
+		for (Path path : exchangeInnerExchangePathReferences.get(ex).get(innerEx.getDirectionlessHashCode())) {
+			path.updateFinalQuantity();
 		}
 	}
 	
-	private void updatePaths(Set<Path> paths) {
-		for (Path path : paths) {
-			path.updateFinalQuantity();
+	public static void registerPathsWithExchangesInnerExchanges(Path path, Map<Exchange, Set<InnerExchange>> innerExchangesInPath) {
+		for (final Entry<Exchange, Set<InnerExchange>> entry : innerExchangesInPath.entrySet()) {
+			for (final InnerExchange innerEx : entry.getValue()) {
+				exchangeInnerExchangePathReferences.get(entry.getKey()).get(innerEx.getDirectionlessHashCode()).add(path);
+			}
 		}
 	}
 	

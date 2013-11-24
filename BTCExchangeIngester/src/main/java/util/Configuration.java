@@ -17,17 +17,11 @@ package util;
 import java.io.FileInputStream;
 import java.util.Properties;
 
-/**
- * A simple class to manage loading the property file containing needed configuration data
- * from the package. Once loaded the configuration is held in memory as a singleton.  Since
- * we already require the simplejpa.properties file to support SimpleJPA, we use that
- * to store additional configuration values.
- */
 public class Configuration {
 
 	private static final Configuration configuration = new Configuration();
     private final Properties props = new Properties();
-    private static final String AWS_PROPERTY_PATH = "properties/AwsCredentials.properties";
+    private static final String AWS_PROPERTY_PATH = "properties/AWS.properties";
     
     private Configuration () {
         try {

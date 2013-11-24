@@ -1,9 +1,11 @@
 package exchange.configuration;
 
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Sets;
 import com.google.common.util.concurrent.AbstractScheduledService.Scheduler;
 
 import exchange.Exchange;
@@ -27,6 +29,7 @@ public class ExchangeApiConfig {
 		timeoutBuilder.put(Exchange.BITSTAMP, Scheduler.newFixedRateSchedule(0, 1000, TimeUnit.MILLISECONDS));
 		
 		API_TIMEOUT_SCHEDULERS = timeoutBuilder.build();
+		validateConfig();
 	}
 	
 	public static String getApiString(Exchange ex) {
@@ -35,6 +38,17 @@ public class ExchangeApiConfig {
 	
 	public static Scheduler getDefaultApiTimeoutScheduler(Exchange ex) {
 		return API_TIMEOUT_SCHEDULERS.get(ex);
+	}
+	
+	private static void validateConfig() {
+		Set<Exchange> unConfiguredExchanges = Sets.complementOf(API_CONNECTION_STRINGS.keySet());
+		if (!unConfiguredExchanges.isEmpty()) {
+			throw new IllegalStateException("Missing API connection string configuration for: " + unConfiguredExchanges);		
+		}
+		unConfiguredExchanges = Sets.complementOf(API_TIMEOUT_SCHEDULERS.keySet());
+		if (!unConfiguredExchanges.isEmpty()) {
+			throw new IllegalStateException("Missing API timout scheduler configuration for: " + unConfiguredExchanges);		
+		}
 	}
 	
 	private ExchangeApiConfig() {}

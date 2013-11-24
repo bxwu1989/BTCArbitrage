@@ -8,7 +8,7 @@ import com.amazonaws.services.sns.AmazonSNSClient;
 
 public class AWSClients {
 
-	private static final String DEFUALT_ENDPOINT = "sns.us-west-2.amazonaws.com";
+	private static final String DEFUALT_ENDPOINT = Configuration.getInstance().getProperty("endpoint");
 	
 	private static final AmazonSNSClient SNS_CLIENT;	
 	static {

@@ -1,5 +1,9 @@
 package exchange.currency;
 
 public enum CurrencyType {
-	Crypto, Non_Crypto, Fiat
+	Digital, Fiat;
+	
+	public enum DigitalCurrencyType {
+		Crypto, Non_Crypto;
+	}
 }
