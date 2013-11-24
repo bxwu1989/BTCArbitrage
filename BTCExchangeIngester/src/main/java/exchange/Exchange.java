@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Sets;
 
 import exchange.services.response.MarketDepth;
@@ -20,7 +21,7 @@ import exchange.paths.Path;
 
 public enum Exchange {
 	CAMPBX,
-	MTGOX;
+	BITFINIX;
 
 	// Active Exchange Data
 	private final Map<Integer, MarketDepth> innerExchangeDepths = new HashMap<Integer, MarketDepth>();
@@ -29,8 +30,7 @@ public enum Exchange {
 	
 	private Exchange() {	
 	}
-	// TODO associate path updates with inner exchanges instead of just exchange, or maybe not
-	// safe to assume that when we update market depth we do it for all inner exchanges of that exchange?
+	
 	public void updateMarketDepth(Currency source, Currency dest, MarketDepth marketDepth) {
 		final Set<Path> paths = new HashSet<Path>();
 		for (InnerExchange innerEx : ExchangeExchangeConfig.getInnerExchangesForCurrenciesIntersection(this,EnumSet.of(source, dest))) {
@@ -110,5 +110,17 @@ public enum Exchange {
 		for (Path path : paths) {
 			path.updateFinalQuantity();
 		}
+	}
+	
+	public static Exchange fromString(String exchangeString) {
+		return fromString.get(exchangeString);
+	}
+	private static final Map<String, Exchange> fromString;
+	static {
+		ImmutableMap.Builder<String, Exchange> builder = ImmutableMap.builder();
+		for (Exchange ex : values()) {
+			builder.put(ex.toString(), ex);
+		}
+		fromString = builder.build();
 	}
 }

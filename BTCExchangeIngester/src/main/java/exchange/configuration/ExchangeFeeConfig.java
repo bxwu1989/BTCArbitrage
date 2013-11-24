@@ -23,11 +23,13 @@ public class ExchangeFeeConfig {
 		
 		// Define default commission fees here:
 		DEFAULT_COMMISSION_FEES.put(Exchange.CAMPBX, Fee.getInstance(0, .55)); // Fee.getInstance(FLAT_RATE, PERCENTAGE_RATE)
-		DEFAULT_COMMISSION_FEES.put(Exchange.MTGOX, Fee.getInstance(0, .6));
+		DEFAULT_COMMISSION_FEES.put(Exchange.BITFINIX, Fee.getInstance(0, .12));
+//		DEFAULT_COMMISSION_FEES.put(Exchange.MTGOX, Fee.getInstance(0, .6));
 		
 		// Define default transfer fees here:
 		DEFAULT_TRANSFER_FEES.put(Exchange.CAMPBX, Fee.getInstance(0, 0)); 
-		DEFAULT_TRANSFER_FEES.put(Exchange.MTGOX, Fee.getInstance(0, 0));
+		DEFAULT_TRANSFER_FEES.put(Exchange.BITFINIX, Fee.getInstance(0, 0));
+//		DEFAULT_TRANSFER_FEES.put(Exchange.MTGOX, Fee.getInstance(0, 0));
 		
 		buildExchangeCommisionFeeMap(DEFAULT_COMMISSION_FEES);
 		buildExchangeTransferFeeMap(DEFAULT_TRANSFER_FEES);

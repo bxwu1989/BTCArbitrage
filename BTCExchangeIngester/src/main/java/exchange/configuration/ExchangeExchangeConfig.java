@@ -19,11 +19,10 @@ public class ExchangeExchangeConfig {
 	static {
 		ImmutableMap.Builder<Exchange, Set<InnerExchange>> builder = ImmutableMap.builder();
 		builder.put(Exchange.CAMPBX, EnumSet.of(InnerExchange.USD_BTC, InnerExchange.BTC_USD));
-		builder.put(Exchange.MTGOX, EnumSet.of(InnerExchange.USD_BTC, InnerExchange.BTC_USD));
+		builder.put(Exchange.BITFINIX, EnumSet.of(InnerExchange.USD_BTC, InnerExchange.BTC_USD));
+//		builder.put(Exchange.MTGOX, EnumSet.of(InnerExchange.USD_BTC, InnerExchange.BTC_USD));
 		INNER_EXCHANGES = builder.build();
 	}
-	
-	
 	
 	public static Set<InnerExchange> getInnerExchanges(Exchange ex) {
 		return INNER_EXCHANGES.get(ex);

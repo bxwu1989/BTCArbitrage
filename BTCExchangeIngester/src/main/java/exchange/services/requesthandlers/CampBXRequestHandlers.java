@@ -17,7 +17,6 @@ import exchange.currency.Currency;
 public final class CampBXRequestHandlers {	
 	
 	public static final class CampBXDepthScheduledServiceRequest extends ExchangeApiRequestHandler  {
-
 		@Override
 		public void handleResponse(final String jsonResponse) {
 			final JsonObject jsonObject = new JsonParser().parse(jsonResponse).getAsJsonObject();

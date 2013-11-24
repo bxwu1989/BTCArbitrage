@@ -20,9 +20,11 @@ public abstract class AwsSnsPublisher extends AbstractScheduledService {
 		for (final Topic topic : AWSClients.getSNSClient().listTopics().getTopics()) {
 			final Matcher arbitragePatternMatcher = getTopicArnPattern().matcher(topic.getTopicArn());
 			if (arbitragePatternMatcher.matches()) {
-				final Exchange exConfig = Exchange.valueOf(arbitragePatternMatcher.group(1).toUpperCase());
-				final PublishRequest request = new PublishRequest(topic.getTopicArn(), getMessageBody(exConfig));
-				AWSClients.getSNSClient().publish(request);
+				final Exchange exConfig = Exchange.fromString(arbitragePatternMatcher.group(1).toUpperCase());
+				if (exConfig != null) {
+					final PublishRequest request = new PublishRequest(topic.getTopicArn(), getMessageBody(exConfig));
+					AWSClients.getSNSClient().publish(request);
+				}
 			}
 		}
 	}
