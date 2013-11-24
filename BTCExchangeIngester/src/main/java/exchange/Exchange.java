@@ -21,7 +21,8 @@ import exchange.paths.Path;
 
 public enum Exchange {
 	CAMPBX,
-	BITFINIX;
+	BITFINIX,
+	BITSTAMP;
 
 	// Active Exchange Data
 	private final Map<Integer, MarketDepth> innerExchangeDepths = new HashMap<Integer, MarketDepth>();

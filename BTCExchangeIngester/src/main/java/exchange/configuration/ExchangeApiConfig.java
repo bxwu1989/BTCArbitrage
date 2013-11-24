@@ -17,12 +17,14 @@ public class ExchangeApiConfig {
 		final ImmutableMap.Builder<Exchange, String> builder = ImmutableMap.builder();
 		builder.put(Exchange.CAMPBX, "http://campbx.com/api/");
 		builder.put(Exchange.BITFINIX, "http://api.bitfinex.com/v1/");
+		builder.put(Exchange.BITSTAMP, "https://www.bitstamp.net/api/");
 //		builder.put(Exchange.MTGOX, "http://data.mtgox.com/api/2/");
 		API_CONNECTION_STRINGS = builder.build();
 		
 		final ImmutableMap.Builder<Exchange, Scheduler> timeoutBuilder = ImmutableMap.builder();
 		timeoutBuilder.put(Exchange.CAMPBX, Scheduler.newFixedRateSchedule(0, 500, TimeUnit.MILLISECONDS));
 		timeoutBuilder.put(Exchange.BITFINIX, Scheduler.newFixedRateSchedule(0, 500, TimeUnit.MILLISECONDS));
+		timeoutBuilder.put(Exchange.BITSTAMP, Scheduler.newFixedRateSchedule(0, 1000, TimeUnit.MILLISECONDS));
 		
 		API_TIMEOUT_SCHEDULERS = timeoutBuilder.build();
 	}
