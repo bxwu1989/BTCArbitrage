@@ -1,16 +1,12 @@
 package exchange.services.publishers;
 
 import java.util.concurrent.TimeUnit;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import exchange.Exchange;
 
 public class AwsSnsArbitragePotentialPublisher extends AwsSnsPublisher {
-
-	@Override
-	public String getMessageBody(Exchange exConfig) {
-		return "test";
-	}
 
 	private static final Pattern ARBITRAGE_TOPIC_PATTERN = Pattern.compile(
 			".*:(\\w*)_Arbitrage_Data$", Pattern.CASE_INSENSITIVE);
@@ -22,7 +18,16 @@ public class AwsSnsArbitragePotentialPublisher extends AwsSnsPublisher {
 
 	@Override
 	protected Scheduler scheduler() {
-		return Scheduler.newFixedRateSchedule(0, 60000, TimeUnit.MILLISECONDS); // TODO pull from config;
+		return Scheduler.newFixedRateSchedule(0, 1, TimeUnit.DAYS); // TODO pull from config;
+	}
+
+	@Override
+	public String getMessageBody(Matcher matcher) {
+		final Exchange exConfig = Exchange.fromString(matcher.group(1).toUpperCase());
+		if (exConfig != null) {
+			// get any exchange specific data you want to report and build a message string
+		}
+		return "test";
 	}
 
 }

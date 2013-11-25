@@ -8,17 +8,15 @@ import java.util.Set;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
 
-import com.google.common.base.Function;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableList.Builder;
-import com.google.common.collect.Ordering;
 
 import exchange.Exchange;
 import exchange.InnerExchange;
 import exchange.currency.CurrencyType;
 import exchange.currency.QuantityDelegate;
 
-public class Path {
+public class Path implements Comparable<Path> {
 
 	private final ImmutableList<ExchangeAction> actionNodes;
 	private final QuantityDelegate originalQuantity;
@@ -28,6 +26,7 @@ public class Path {
 	
 	public Path(final ImmutableList<ExchangeAction> actionNodes, final QuantityDelegate orginalQuantity) { 
 		this.originalQuantity = QuantityDelegate.getCurrencyQuant(orginalQuantity, actionNodes.get(0).getSourceCurrency());
+		this.percentDiff = QuantityDelegate.getCurrencyQuant(0, actionNodes.get(0).getSourceCurrency());
 		this.actionNodes = actionNodes;		
 	}
 	
@@ -44,7 +43,6 @@ public class Path {
 		updatePercentDiff();
 		
 		pathString = percentDiff.toString() + "% : " + sb.toString();
-		System.out.println(pathString);
 	}
 	
 	private void updatePercentDiff() {
@@ -77,11 +75,10 @@ public class Path {
 		return EqualsBuilder.reflectionEquals(this, obj);
 	}
 	
-	Ordering<Path> pathOrderByPercentDiffDesc = Ordering.natural().onResultOf(new Function<Path, QuantityDelegate>() {
-		@Override public QuantityDelegate apply(Path input) {
-			return input.getPercentDifference();
-		}		
-	}).reverse();
+	@Override
+	public int compareTo(Path o) {
+		return percentDiff.compareTo(o.percentDiff);
+	}
 	
 	static class PathBuilder {
 		private final ImmutableList<ExchangeAction> exActionNodes;

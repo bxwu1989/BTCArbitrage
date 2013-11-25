@@ -79,6 +79,7 @@ public enum Exchange {
 		return Sets.difference(ExchangeExchangeConfig.getExchangesForCurrency(currency), EnumSet.of(this));
 	}
 
+	private static final Set<Path> allPaths = new HashSet<>();
 	private static final Map<Exchange, Map<Integer, Set<Path>>> exchangeInnerExchangePathReferences;
 	static {
 		ImmutableMap.Builder<Exchange, Map<Integer, Set<Path>>> exchangeInnerExchangePathReferencesBuilder = ImmutableMap.builder();
@@ -103,8 +104,13 @@ public enum Exchange {
 		for (final Entry<Exchange, Set<InnerExchange>> entry : innerExchangesInPath.entrySet()) {
 			for (final InnerExchange innerEx : entry.getValue()) {
 				exchangeInnerExchangePathReferences.get(entry.getKey()).get(innerEx.getDirectionlessHashCode()).add(path);
+				allPaths.add(path);
 			}
 		}
+	}
+	
+	public static Set<Path> getAllPaths() {
+		return allPaths;
 	}
 	
 	public static Exchange fromString(String exchangeString) {
