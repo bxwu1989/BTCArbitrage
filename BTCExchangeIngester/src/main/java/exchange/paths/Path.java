@@ -43,6 +43,7 @@ public class Path implements Comparable<Path> {
 		updatePercentDiff();
 		
 		pathString = percentDiff.toString() + "% : " + sb.toString();
+		System.out.println(pathString);
 	}
 	
 	private void updatePercentDiff() {

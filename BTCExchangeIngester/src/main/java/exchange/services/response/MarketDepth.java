@@ -88,9 +88,9 @@ public class MarketDepth {
 	}
 	
 	public static class MarketDepthBuilder {
-		private final ImmutableSortedSet.Builder<PriceQuantity> askBuilder = ImmutableSortedSet.naturalOrder();
-		private final ImmutableSortedSet.Builder<PriceQuantity> bidBuilder = ImmutableSortedSet.reverseOrder();
-		private final Currency source;
+		private final ImmutableSortedSet.Builder<PriceQuantity> askBuilder = ImmutableSortedSet.naturalOrder(); // The ordering here is very important!
+		private final ImmutableSortedSet.Builder<PriceQuantity> bidBuilder = ImmutableSortedSet.reverseOrder(); // We want to consume the lowest asks
+		private final Currency source;																			// and the highest bids.
 	    private final Currency destination;
 	    
 		private MarketDepthBuilder(Currency source, Currency destination) {
@@ -99,17 +99,15 @@ public class MarketDepth {
 	    }
 		
 		public void addAsk(double price, double quantity) {
-			addAsk(QuantityDelegate.getQuant(price), QuantityDelegate.getQuant(quantity));
+			add(price, quantity, askBuilder);
 		}
-		public void addAsk(QuantityDelegate price, QuantityDelegate quantity) {
-			askBuilder.add(new PriceQuantity(price, quantity));
+
+		public void addBid(double price, double quantity) {
+			add(price, quantity, bidBuilder);
 		}
 		
-		public void addBid(double price, double quantity) {
-			addBid(QuantityDelegate.getQuant(price), QuantityDelegate.getQuant(quantity));
-		}
-		public void addBid(QuantityDelegate price, QuantityDelegate quantity) {
-			bidBuilder.add(new PriceQuantity(price, quantity));
+		private void add(double price, double quantity, ImmutableSortedSet.Builder<PriceQuantity> builder) {
+			builder.add(new PriceQuantity(QuantityDelegate.getCurrencyQuant(price, source), QuantityDelegate.getCurrencyQuant(quantity, destination)));
 		}
 		
 		public MarketDepth build() {
@@ -121,7 +119,7 @@ public class MarketDepth {
 	/**
 	 * Price and Quantity Tuple.
 	 */
-	public static class PriceQuantity implements Comparable<PriceQuantity> {
+	private static class PriceQuantity implements Comparable<PriceQuantity> {
 	    private final QuantityDelegate price;
 	    private final QuantityDelegate quantity;
 

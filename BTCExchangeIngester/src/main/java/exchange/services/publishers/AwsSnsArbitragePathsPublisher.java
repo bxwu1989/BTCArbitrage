@@ -19,9 +19,9 @@ public class AwsSnsArbitragePathsPublisher extends AwsSnsPublisher {
 	@Override
 	public String getMessageBody(Matcher matcher) {
 		final List<Path> topPaths = Ordering.natural().reverse().leastOf(Exchange.getAllPaths(), NUM_PATHS_TO_REPORT);
-		final StringBuilder pathStringBuilder = new StringBuilder("Top"+ NUM_PATHS_TO_REPORT + " Paths:");
+		final StringBuilder pathStringBuilder = new StringBuilder("Top"+ NUM_PATHS_TO_REPORT + " Arbitrage Paths:");
 		for (int i = 0 ; i < topPaths.size(); i++) {
-			pathStringBuilder.append("\n" + (i+1) + ". ").append(topPaths.get(i));
+			pathStringBuilder.append("\n\n" + (i+1) + ". ").append(topPaths.get(i));
 		}
 		System.out.println(pathStringBuilder.toString());
 		return pathStringBuilder.toString();
