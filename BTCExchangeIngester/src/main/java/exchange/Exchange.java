@@ -14,8 +14,8 @@ import com.google.common.collect.Sets;
 import exchange.configuration.ExchangeExchangeConfig;
 import exchange.configuration.ExchangeFeeConfig;
 import exchange.currency.Currency;
-import exchange.currency.CurrencyQuantDelegate;
 import exchange.currency.CurrencyType;
+import exchange.currency.QuantityDelegate;
 import exchange.paths.Path;
 import exchange.services.response.MarketDepth;
 import exchange.services.response.Ticker;
@@ -32,8 +32,8 @@ public enum Exchange {
 	private Exchange() {	
 	}
 	
-	public void updateMarketDepth(Currency source, Currency dest, MarketDepth marketDepth) {
-		final InnerExchange innerEx = ExchangeExchangeConfig.getInnerExchange(this, source, dest);
+	public void updateMarketDepth(MarketDepth marketDepth) {
+		final InnerExchange innerEx = ExchangeExchangeConfig.getInnerExchange(this, marketDepth.getSource(), marketDepth.getDestination());
 		innerExchangeMarketDepths.put(innerEx.getDirectionlessHashCode(), marketDepth);
 		updatePaths(this, innerEx);
 	}
@@ -42,15 +42,15 @@ public enum Exchange {
 		this.ticker.updateTicker(ticker);
 	}
 	
-	public CurrencyQuantDelegate getAppliedTradeCommissionFeeQuantity(CurrencyQuantDelegate quantity, InnerExchange innerExchange) {
+	public QuantityDelegate getAppliedTradeCommissionFeeQuantity(QuantityDelegate quantity, InnerExchange innerExchange) {
 		return ExchangeFeeConfig.getTradeCommissionFee(this, innerExchange).getAppliedFeeQuantity(quantity);
 	}
 	
-	public CurrencyQuantDelegate convertAmount(CurrencyQuantDelegate quantity, InnerExchange innerExchange) {
+	public QuantityDelegate convertAmount(QuantityDelegate quantity, InnerExchange innerExchange) {
 		final MarketDepth marketDepth = innerExchangeMarketDepths.get(innerExchange.getDirectionlessHashCode());
-		if (marketDepth == null) return CurrencyQuantDelegate.getCurrencyQuant(0);
+		if (marketDepth == null) return QuantityDelegate.getCurrencyQuant(0, innerExchange.getDestinationCurrency());
 		
-		CurrencyQuantDelegate convertedQuant = ExchangeFeeConfig.getTradeCommissionFee(this, innerExchange).getQuantityAfterAppliedFee(quantity);
+		QuantityDelegate convertedQuant = ExchangeFeeConfig.getTradeCommissionFee(this, innerExchange).getQuantityAfterAppliedFee(quantity);
 		switch (innerExchange.getSourceCurrency().getType()) {
 		case Fiat:
 			convertedQuant = marketDepth.consumeAsks(convertedQuant);
@@ -62,7 +62,7 @@ public enum Exchange {
 		return convertedQuant;
 	}
 	
-	public CurrencyQuantDelegate getAppliedCurrencyTransferFeeQuantity(CurrencyQuantDelegate quantity, Currency currency) {
+	public QuantityDelegate getAppliedCurrencyTransferFeeQuantity(QuantityDelegate quantity, Currency currency) {
 		return ExchangeFeeConfig.getTransferFee(this, currency).getAppliedFeeQuantity(quantity);
 	}
 	

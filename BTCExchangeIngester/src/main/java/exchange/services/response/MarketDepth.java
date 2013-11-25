@@ -7,7 +7,8 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 import com.google.common.collect.ImmutableSortedSet;
 
-import exchange.currency.CurrencyQuantDelegate;
+import exchange.currency.Currency;
+import exchange.currency.QuantityDelegate;
 
 /**
  * For Bids and Asks there is a list of Price and Quantity.
@@ -15,10 +16,14 @@ import exchange.currency.CurrencyQuantDelegate;
 public class MarketDepth {
     private final SortedSet<PriceQuantity> bids;
     private final SortedSet<PriceQuantity> asks;
+    private final Currency source;
+    private final Currency destination;
     
-    public MarketDepth(SortedSet<PriceQuantity> bids, SortedSet<PriceQuantity> asks) {
+    public MarketDepth(SortedSet<PriceQuantity> bids, SortedSet<PriceQuantity> asks, Currency source, Currency destination) {
     	this.bids = bids;
         this.asks = asks;
+        this.source = source;
+        this.destination = destination;
     }
 
     /**
@@ -27,8 +32,8 @@ public class MarketDepth {
      * @param quantity Quantity to sell.
      * @return
      */
-    public CurrencyQuantDelegate consumeBids(CurrencyQuantDelegate quantity) {
-    	CurrencyQuantDelegate newQuant = CurrencyQuantDelegate.getCurrencyQuant(0);
+    public QuantityDelegate consumeBids(QuantityDelegate quantity) {
+    	QuantityDelegate newQuant = QuantityDelegate.getCurrencyQuant(0, source);
     	for (final PriceQuantity priceQuantity : bids) { 
     		if (quantity.compareTo(priceQuantity.getQuantity()) > 0) {  // want more than available, consume entire bid.
     			quantity = quantity.subtract(priceQuantity.getQuantity());
@@ -47,10 +52,10 @@ public class MarketDepth {
      * @param quantity Quantity to buy.
      * @return
      */
-    public CurrencyQuantDelegate consumeAsks(CurrencyQuantDelegate quantity) {
-    	CurrencyQuantDelegate newQuant = CurrencyQuantDelegate.getCurrencyQuant(0);
+    public QuantityDelegate consumeAsks(QuantityDelegate quantity) {
+    	QuantityDelegate newQuant = QuantityDelegate.getCurrencyQuant(0, destination);
     	for (final PriceQuantity priceQuantity : asks) { 
-    		final CurrencyQuantDelegate quantWanted = quantity.divide(priceQuantity.getPrice());
+    		final QuantityDelegate quantWanted = quantity.divide(priceQuantity.getPrice());
     		if (quantWanted.compareTo(priceQuantity.getQuantity()) > 0) { // want more than available, consume entire ask.
     			quantity = quantity.subtract(priceQuantity.getVolume());  // update how much we still need
     			newQuant = newQuant.add(priceQuantity.getQuantity());
@@ -62,6 +67,14 @@ public class MarketDepth {
     	return newQuant;
     }
 
+	public Currency getSource() {
+		return source;
+	}
+
+	public Currency getDestination() {
+		return destination;
+	}
+
 	@Override
 	public String toString() {
 		StringBuilder builder = new StringBuilder();
@@ -70,32 +83,37 @@ public class MarketDepth {
 		return builder.toString();
 	}
 
-	public static MarketDepthBuilder builder() {
-		return new MarketDepthBuilder();
+	public static MarketDepthBuilder builder(Currency source, Currency destination) {
+		return new MarketDepthBuilder(source, destination);
 	}
 	
 	public static class MarketDepthBuilder {
 		private final ImmutableSortedSet.Builder<PriceQuantity> askBuilder = ImmutableSortedSet.naturalOrder();
 		private final ImmutableSortedSet.Builder<PriceQuantity> bidBuilder = ImmutableSortedSet.reverseOrder();
-		
-		private MarketDepthBuilder() {}
+		private final Currency source;
+	    private final Currency destination;
+	    
+		private MarketDepthBuilder(Currency source, Currency destination) {
+	        this.source = source;
+	        this.destination = destination;
+	    }
 		
 		public void addAsk(double price, double quantity) {
-			addAsk(CurrencyQuantDelegate.getCurrencyQuant(price), CurrencyQuantDelegate.getCurrencyQuant(quantity));
+			addAsk(QuantityDelegate.getQuant(price), QuantityDelegate.getQuant(quantity));
 		}
-		public void addAsk(CurrencyQuantDelegate price, CurrencyQuantDelegate quantity) {
+		public void addAsk(QuantityDelegate price, QuantityDelegate quantity) {
 			askBuilder.add(new PriceQuantity(price, quantity));
 		}
 		
 		public void addBid(double price, double quantity) {
-			addBid(CurrencyQuantDelegate.getCurrencyQuant(price), CurrencyQuantDelegate.getCurrencyQuant(quantity));
+			addBid(QuantityDelegate.getQuant(price), QuantityDelegate.getQuant(quantity));
 		}
-		public void addBid(CurrencyQuantDelegate price, CurrencyQuantDelegate quantity) {
+		public void addBid(QuantityDelegate price, QuantityDelegate quantity) {
 			bidBuilder.add(new PriceQuantity(price, quantity));
 		}
 		
 		public MarketDepth build() {
-			return new MarketDepth(bidBuilder.build(), askBuilder.build());
+			return new MarketDepth(bidBuilder.build(), askBuilder.build(), source, destination);
 		}
 	}
 	
@@ -104,23 +122,23 @@ public class MarketDepth {
 	 * Price and Quantity Tuple.
 	 */
 	public static class PriceQuantity implements Comparable<PriceQuantity> {
-	    private final CurrencyQuantDelegate price;
-	    private final CurrencyQuantDelegate quantity;
+	    private final QuantityDelegate price;
+	    private final QuantityDelegate quantity;
 
-	    private PriceQuantity(CurrencyQuantDelegate price, CurrencyQuantDelegate quantity) {
+	    private PriceQuantity(QuantityDelegate price, QuantityDelegate quantity) {
 	        this.price = price;
 	        this.quantity = quantity;
 	    }
 
-		public CurrencyQuantDelegate getPrice() {
+		public QuantityDelegate getPrice() {
 			return price;
 		}
 
-		public CurrencyQuantDelegate getQuantity() {
+		public QuantityDelegate getQuantity() {
 			return quantity;
 		}
 		
-		public CurrencyQuantDelegate getVolume() {
+		public QuantityDelegate getVolume() {
 			return quantity.multiply(price);
 		}
 		

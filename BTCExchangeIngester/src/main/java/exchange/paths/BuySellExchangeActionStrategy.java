@@ -5,27 +5,28 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 
 import exchange.Exchange;
+import exchange.InnerExchange;
 import exchange.currency.Currency;
-import exchange.currency.CurrencyQuantDelegate;
+import exchange.currency.QuantityDelegate;
 
-public class TransferExchangeActionNode implements ExchangeActionNode {
+class BuySellExchangeActionStrategy implements ExchangeAction {
 
+	private final InnerExchange innerExchange;
 	private final Exchange outerExchange;
-	private final Currency currency;
-	
-	TransferExchangeActionNode(Exchange outerEx, Currency currency) {
+
+	BuySellExchangeActionStrategy(Exchange outerEx, InnerExchange innerEx) {
+		this.innerExchange = innerEx;
 		this.outerExchange = outerEx;
-		this.currency = currency;
 	}
 	
 	@Override
-	public CurrencyQuantDelegate getAppliedFeeQuantity(CurrencyQuantDelegate originalQuantity) {
-		return outerExchange.getAppliedCurrencyTransferFeeQuantity(originalQuantity, currency);
+	public QuantityDelegate getAppliedFeeQuantity(QuantityDelegate originalQuantity) {
+		return outerExchange.getAppliedTradeCommissionFeeQuantity(originalQuantity, innerExchange);
 	}
 
 	@Override
-	public CurrencyQuantDelegate getConvertedQuantity(CurrencyQuantDelegate originalQuantity) {
-		return originalQuantity.subtract(getAppliedFeeQuantity(originalQuantity));
+	public QuantityDelegate getConvertedQuantity(QuantityDelegate originalQuantity) {
+		return outerExchange.convertAmount(originalQuantity, innerExchange);
 	}
 
 	@Override
@@ -35,12 +36,12 @@ public class TransferExchangeActionNode implements ExchangeActionNode {
 
 	@Override
 	public Currency getSourceCurrency() {
-		return currency;
+		return innerExchange.getSourceCurrency();
 	}
 
 	@Override
 	public Currency getDestinationCurrency() {
-		return currency;
+		return innerExchange.getDestinationCurrency();
 	}
 	
 	@Override

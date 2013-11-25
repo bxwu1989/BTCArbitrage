@@ -21,7 +21,7 @@ public class BitstampRequestHandlers {
 		public void handleResponse(final String jsonResponse) {
 			final JsonObject jsonObject = new JsonParser().parse(jsonResponse).getAsJsonObject();
 			final MarketDepth marketDepth = buildMarketDepthFromJson(jsonObject.get("bids").getAsJsonArray(), jsonObject.get("asks").getAsJsonArray());
-			exchange.updateMarketDepth(Currency.USD, Currency.BTC, marketDepth);
+			exchange.updateMarketDepth(marketDepth);
 		}
 
 		@Override
@@ -30,7 +30,7 @@ public class BitstampRequestHandlers {
 		}
 		
 		private MarketDepth buildMarketDepthFromJson(final JsonArray bids, final JsonArray asks) {
-			final MarketDepthBuilder marketDepthBuilder = MarketDepth.builder();
+			final MarketDepthBuilder marketDepthBuilder = MarketDepth.builder(Currency.USD, Currency.BTC);
 			final Iterator<JsonElement> bidIter = bids.iterator();
 	        while (bidIter.hasNext()) {
 	        	final JsonArray encodedPriceQuantity = (JsonArray)bidIter.next();

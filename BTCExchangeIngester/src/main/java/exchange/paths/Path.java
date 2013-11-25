@@ -15,27 +15,27 @@ import com.google.common.collect.Ordering;
 
 import exchange.Exchange;
 import exchange.InnerExchange;
-import exchange.currency.CurrencyQuantDelegate;
 import exchange.currency.CurrencyType;
+import exchange.currency.QuantityDelegate;
 
 public class Path {
 
-	private final ImmutableList<ExchangeActionNode> actionNodes;
-	private final CurrencyQuantDelegate originalQuantity;
-	private CurrencyQuantDelegate finalQuantity;
-	private CurrencyQuantDelegate percentDiff;
+	private final ImmutableList<ExchangeAction> actionNodes;
+	private final QuantityDelegate originalQuantity;
+	private QuantityDelegate finalQuantity;
+	private QuantityDelegate percentDiff;
 	private String pathString = "";
 	
-	public Path(final ImmutableList<ExchangeActionNode> actionNodes, final CurrencyQuantDelegate orginalQuantity) { 
-		this.originalQuantity = orginalQuantity;
+	public Path(final ImmutableList<ExchangeAction> actionNodes, final QuantityDelegate orginalQuantity) { 
+		this.originalQuantity = QuantityDelegate.getCurrencyQuant(orginalQuantity, actionNodes.get(0).getSourceCurrency());
 		this.actionNodes = actionNodes;		
 	}
 	
 	public void updateFinalQuantity() {
-		CurrencyQuantDelegate transitionalQuantity = originalQuantity;
+		QuantityDelegate transitionalQuantity = originalQuantity;
 		final StringBuilder sb = new StringBuilder();
 		sb.append(transitionalQuantity.toString() + actionNodes.get(0).getSourceCurrency()  + "@" + actionNodes.get(0).getExchange()); 
-		for (final ExchangeActionNode actionNode : actionNodes) { 
+		for (final ExchangeAction actionNode : actionNodes) { 
 			transitionalQuantity = actionNode.getConvertedQuantity(transitionalQuantity);			
 			sb.append(" -> " + transitionalQuantity.toString() + actionNode.getDestinationCurrency() + "@" + actionNode.getExchange());
 		}
@@ -48,22 +48,22 @@ public class Path {
 	}
 	
 	private void updatePercentDiff() {
-		percentDiff = finalQuantity.subtract(originalQuantity).divide(originalQuantity).multiply(CurrencyQuantDelegate.getCurrencyQuant(100.00));
+		percentDiff = finalQuantity.subtract(originalQuantity).divide(originalQuantity).multiply(QuantityDelegate.getQuant(100.00));
 	}
 
-	public CurrencyQuantDelegate getFinalQuantity() {
+	public QuantityDelegate getFinalQuantity() {
 		return finalQuantity;
 	}
 
-	private void setFinalQuantity(CurrencyQuantDelegate finalQuantity) {
+	private void setFinalQuantity(QuantityDelegate finalQuantity) {
 		this.finalQuantity = finalQuantity;
 	}
 	
-	public CurrencyQuantDelegate getPercentDifference() {
+	public QuantityDelegate getPercentDifference() {
 		return originalQuantity.subtract(finalQuantity).divide(originalQuantity);
 	}
 	
-	public static PathBuilder builder(int maxDepth, ExchangeActionNode initialExActionNode) {
+	public static PathBuilder builder(int maxDepth, ExchangeAction initialExActionNode) {
 		return new PathBuilder(maxDepth, initialExActionNode);
 	}
 	
@@ -77,41 +77,20 @@ public class Path {
 		return EqualsBuilder.reflectionEquals(this, obj);
 	}
 	
-	Ordering<Path> pathOrderByPercentDiffDesc = Ordering.natural().onResultOf(new Function<Path, CurrencyQuantDelegate>() {
-		@Override public CurrencyQuantDelegate apply(Path input) {
+	Ordering<Path> pathOrderByPercentDiffDesc = Ordering.natural().onResultOf(new Function<Path, QuantityDelegate>() {
+		@Override public QuantityDelegate apply(Path input) {
 			return input.getPercentDifference();
 		}		
 	}).reverse();
 	
-/*	private static final Map<Exchange, Map<InnerExchange, Set<Path>>> exchangeInnerExchangePathReferences;
-	static {
-		ImmutableMap.Builder<Exchange, Map<InnerExchange, Set<Path>>> exchangeInnerExchangePathReferencesBuilder = ImmutableMap.builder();
-		for (Exchange ex : Exchange.values()) {
-			ImmutableMap.Builder<InnerExchange, Set<Path>> innerExchangePathReferencesBuilder = ImmutableMap.builder();
-			for (InnerExchange innerEx : ExchangeExchangeConfig.getInnerExchanges(ex)) {
-				innerExchangePathReferencesBuilder.put(innerEx, new HashSet<Path>());
-			}
-			exchangeInnerExchangePathReferencesBuilder.put(ex, innerExchangePathReferencesBuilder.build());
-		}
-		exchangeInnerExchangePathReferences = exchangeInnerExchangePathReferencesBuilder.build();
-	}
-	
-	public static void updatePaths(Exchange ex, Set<InnerExchange> innerExs) {
-		for (InnerExchange innerEx : innerExs) {
-			for (Path path : exchangeInnerExchangePathReferences.get(ex).get(innerEx)) {
-				path.updateFinalQuantity();
-			}
-		}
-	}*/
-	
 	static class PathBuilder {
-		private final ImmutableList<ExchangeActionNode> exActionNodes;
+		private final ImmutableList<ExchangeAction> exActionNodes;
 		private final Map<Exchange, Set<InnerExchange>> innerExchangesInPath = new EnumMap<>(Exchange.class);
 		private final int depth;
 		private final int maxDepth;
 		
-		private PathBuilder(int maxDepth, ExchangeActionNode initialExActionNode) {
-			this.exActionNodes = ImmutableList.<ExchangeActionNode>builder().add(initialExActionNode).build();
+		private PathBuilder(int maxDepth, ExchangeAction initialExActionNode) {
+			this.exActionNodes = ImmutableList.<ExchangeAction>builder().add(initialExActionNode).build();
 			this.maxDepth = maxDepth;
 			this.depth = 0;
 			
@@ -120,10 +99,10 @@ public class Path {
 			innerExchangesInPath.put(initialExActionNode.getExchange(), innerExs);
 		}
 		
-		private PathBuilder(ImmutableList<ExchangeActionNode> exActionNodes, Map<Exchange, Set<InnerExchange>> innerExchangesInPath,
-				ExchangeActionNode latestExActionNode, int maxDepth, int depth) {
-			final Builder<ExchangeActionNode> listBuilder = ImmutableList.builder();
-			for (final ExchangeActionNode exActionNode : exActionNodes) { 
+		private PathBuilder(ImmutableList<ExchangeAction> exActionNodes, Map<Exchange, Set<InnerExchange>> innerExchangesInPath,
+				ExchangeAction latestExActionNode, int maxDepth, int depth) {
+			final Builder<ExchangeAction> listBuilder = ImmutableList.builder();
+			for (final ExchangeAction exActionNode : exActionNodes) { 
 				listBuilder.add(exActionNode);
 			}
 			listBuilder.add(latestExActionNode);
@@ -138,7 +117,7 @@ public class Path {
 			this.depth = depth+1;
 		}
 		
-		private void updateInnerExchangesPerExchange(ExchangeActionNode exchangeActionNode) {
+		private void updateInnerExchangesPerExchange(ExchangeAction exchangeActionNode) {
 			updateInnerExchangesPerExchange(exchangeActionNode.getExchange(), 
 					InnerExchange.getInnerExchange(exchangeActionNode.getSourceCurrency(), exchangeActionNode.getDestinationCurrency()));
 		}
@@ -153,7 +132,7 @@ public class Path {
 			}
 		}
 		
-		private PathBuilder copy(ExchangeActionNode latestExActionNode) {
+		private PathBuilder copy(ExchangeAction latestExActionNode) {
 			return new PathBuilder(exActionNodes, innerExchangesInPath, latestExActionNode, maxDepth, depth);
 		};
 		
@@ -165,31 +144,31 @@ public class Path {
 			return exActionNodes.size();
 		}
 		
-		public PathBuilder addNode(ExchangeActionNode actionNode) {
+		public PathBuilder addNode(ExchangeAction actionNode) {
 			return copy(actionNode);
 		}
 		
-		public PathBuilder addNodeIgnoreDuplicatesAndRespectDepth(ExchangeActionNode actionNode) {
+		public PathBuilder addNodeIgnoreDuplicatesAndRespectDepth(ExchangeAction actionNode) {
 			return ( depth >= maxDepth
-					|| (actionNode.getSourceCurrency().getType().equals(CurrencyType.Fiat) 
-							&& exActionNodes.contains(actionNode))
-					|| (!actionNode.getSourceCurrency().getType().equals(CurrencyType.Fiat) 
+					|| (actionNode.getSourceCurrency().getType().equals(CurrencyType.Fiat) // Allow duplicate Digital Currency transfers and sells,
+							&& exActionNodes.contains(actionNode)) 							// but block duplicate buys from the same exchange.
+					|| (actionNode.getSourceCurrency().getType().equals(CurrencyType.Digital) // Block a buy and then sell in the same exchange with the same currency
 							&& actionNode.getDestinationCurrency().equals(getLastExchangeActionNode().getSourceCurrency()) 
 							&& actionNode.getSourceCurrency().equals(getLastExchangeActionNode().getDestinationCurrency()) ) ) ? 
 							null : addNode(actionNode);
 		}
 		
-		public Path buildAndRegisterWithExchangesInnerExchanges(final CurrencyQuantDelegate orginalQuantity) {
+		public Path buildAndRegisterWithExchangesInnerExchanges(final QuantityDelegate orginalQuantity) {
 			final Path path = new Path(exActionNodes, orginalQuantity);
 			Exchange.registerPathsWithExchangesInnerExchanges(path, innerExchangesInPath);
 			return path;
 		}
 		
-		public ExchangeActionNode getLastExchangeActionNode() {
+		public ExchangeAction getLastExchangeActionNode() {
 			return exActionNodes.get(exActionNodes.size()-1);
 		}
 
-		public ExchangeActionNode getFirstExchangeActionNode() {
+		public ExchangeAction getFirstExchangeActionNode() {
 			return exActionNodes.get(0);
 		}
 		

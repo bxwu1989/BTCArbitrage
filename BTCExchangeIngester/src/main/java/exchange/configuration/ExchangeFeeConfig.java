@@ -12,10 +12,12 @@ import com.google.common.collect.Sets;
 import exchange.Exchange;
 import exchange.InnerExchange;
 import exchange.currency.Currency;
-import exchange.currency.CurrencyQuantDelegate;
+import exchange.currency.QuantityDelegate;
 
 public class ExchangeFeeConfig {
 
+	private static final double DEFAULT_MINER_TRX_FEE = .0005; // BTC
+	
 	private static Map<Exchange, Map<InnerExchange, Fee>> TRADE_COMMISSIONS;
 	private static Map<Exchange, Map<Currency, Fee>> TRANSFER_FEES;
 	
@@ -24,15 +26,15 @@ public class ExchangeFeeConfig {
 		final Map<Exchange, Fee> DEFAULT_TRANSFER_FEES = new EnumMap<>(Exchange.class);
 		
 		// Define default commission fees here:
-		DEFAULT_COMMISSION_FEES.put(Exchange.CAMPBX, Fee.getInstance(0, .55)); // Fee.getInstance(FLAT_RATE, PERCENTAGE_RATE)
-		DEFAULT_COMMISSION_FEES.put(Exchange.BITFINIX, Fee.getInstance(0, .12));
-		DEFAULT_COMMISSION_FEES.put(Exchange.BITSTAMP, Fee.getInstance(0, .5));
+		DEFAULT_COMMISSION_FEES.put(Exchange.CAMPBX, Fee.getInstance(0, 0.0055)); // Fee.getInstance(FLAT_RATE, PERCENTAGE_RATE)
+		DEFAULT_COMMISSION_FEES.put(Exchange.BITFINIX, Fee.getInstance(0, 0.0012)); // .12%
+		DEFAULT_COMMISSION_FEES.put(Exchange.BITSTAMP, Fee.getInstance(0, 0.005));
 //		DEFAULT_COMMISSION_FEES.put(Exchange.MTGOX, Fee.getInstance(0, .6));
 		
 		// Define default transfer fees here:
-		DEFAULT_TRANSFER_FEES.put(Exchange.CAMPBX, Fee.getInstance(0, 0)); 
-		DEFAULT_TRANSFER_FEES.put(Exchange.BITFINIX, Fee.getInstance(0, 0));
-		DEFAULT_TRANSFER_FEES.put(Exchange.BITSTAMP, Fee.getInstance(0, 0));
+		DEFAULT_TRANSFER_FEES.put(Exchange.CAMPBX, Fee.getInstance(DEFAULT_MINER_TRX_FEE, 0.00)); // 
+		DEFAULT_TRANSFER_FEES.put(Exchange.BITFINIX, Fee.getInstance(DEFAULT_MINER_TRX_FEE, 0.00));
+		DEFAULT_TRANSFER_FEES.put(Exchange.BITSTAMP, Fee.getInstance(DEFAULT_MINER_TRX_FEE, 0.00));
 //		DEFAULT_TRANSFER_FEES.put(Exchange.MTGOX, Fee.getInstance(0, 0));
 		
 		buildExchangeCommisionFeeMap(DEFAULT_COMMISSION_FEES);
@@ -58,8 +60,8 @@ public class ExchangeFeeConfig {
 	public static class Fee {
 		private static final Map<Integer, Fee> flywieghtFees = new HashMap<>();
 		
-		private final CurrencyQuantDelegate flatRate;
-		private final CurrencyQuantDelegate percentage;
+		private final QuantityDelegate flatRate;
+		private final QuantityDelegate percentage;
 		
 		public static Fee getInstance(double flatRate, double percentage) {
 			Fee fee = flywieghtFees.get(feeHashCode(flatRate, percentage));
@@ -82,23 +84,23 @@ public class ExchangeFeeConfig {
 		}
 		
 		private Fee(double flat, double percentage) {
-			this.flatRate = CurrencyQuantDelegate.getCurrencyQuant(flat);
-			this.percentage = CurrencyQuantDelegate.getCurrencyQuant(percentage);
+			this.flatRate = QuantityDelegate.getQuant(flat);
+			this.percentage = QuantityDelegate.getQuant(percentage);
 		}
 
-		public CurrencyQuantDelegate getFlatRate() {
+		public QuantityDelegate getFlatRate() {
 			return flatRate;
 		}
 
-		public CurrencyQuantDelegate getPercentage() {
+		public QuantityDelegate getPercentage() {
 			return percentage;
 		}
 		
-		public CurrencyQuantDelegate getAppliedFeeQuantity(CurrencyQuantDelegate quantity) {
+		public QuantityDelegate getAppliedFeeQuantity(QuantityDelegate quantity) {
 			return quantity.multiply(percentage).add(flatRate);
 		}
 		
-		public CurrencyQuantDelegate getQuantityAfterAppliedFee(CurrencyQuantDelegate quantity) {
+		public QuantityDelegate getQuantityAfterAppliedFee(QuantityDelegate quantity) {
 			return quantity.subtract(getAppliedFeeQuantity(quantity));
 		}
 	}
